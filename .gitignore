@@ -1,0 +1,13 @@
+.vscode
+
+.artifacts/**
+.tmp/**
+
+.engine/**
+coldbox/**
+docbox/**
+testbox/**
+logs/**
+
+# log files
+logs/**

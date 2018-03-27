@@ -1,167 +1,284 @@
 component accessors="true"{
 
-    // The Java Stream we represent
-    property name="jStream";
+	// The Java Stream we represent
+	property name="jStream";
 
-    // Static Stream Class Access
-    variables.coreStream    = createObject( "java", "java.util.stream.Stream" );
-    variables.longStream    = createObject( "java", "java.util.stream.LongStream" );
+	// Static Stream Class Access
+	variables.coreStream    = createObject( "java", "java.util.stream.Stream" );
+	variables.longStream    = createObject( "java", "java.util.stream.LongStream" );
+	variables.Arrays        = createObject( "java", "java.util.Arrays" );
 
-    /**
-     * Construct a stream
-     *
-     * @collection This is an optional collection to build a stream on: List, Array, Struct, Query
-     */
-    Stream function init( any collection="" ){
+	// Lucee pivot
+	variables.isLucee = server.keyExists( "lucee" );
 
-        // If a list, enhance to array
-        if( isSimpleValue( arguments.collection ) ){
-            arguments.collection = arguments.collection.listToArray();
-        }
+	/**
+	 * Construct a stream
+	 *
+	 * @collection This is an optional collection to build a stream on: List, Array, Struct, Query
+	 */
+	Stream function init( any collection="" ){
+		// If a list, enhance to array
+		if( isSimpleValue( arguments.collection ) ){
+			arguments.collection = listToArray( arguments.collection );
+		}
 
-        // If Array
-        if( isArray( arguments.collection ) ){
-            variables.jStream = arguments.collection.stream();
-            return this;
-        }
-        
-        // If Struct
-        if( isStruct( arguments.collection ) ){
-            variables.jStream = arguments.collection.entrySet().stream();
-            return this;
-        }
+		// If Array
+		if( isArray( arguments.collection ) ){
+			variables.jStream = variables.Arrays.stream( 
+				javaCast( "java.lang.Object[]", arguments.collection ) 
+			);
+			return this;
+		}
+		
+		// If Struct
+		if( isStruct( arguments.collection ) ){
+			
+			if( variables.isLucee ){
+				variables.jStream = arguments.collection.entrySet().stream();
+			} else {
+				arguments.collection = createObject( "java", "java.util.HashMap" )
+					.init( arguments.collection )
+					.entrySet()
+					.toArray();
+				
+				variables.jStream = variables.Arrays.stream( 
+					arguments.collection
+				);
+			}
 
-        // If Query
-        if( isQuery( arguments.collection ) ){
+			return this;
+		}
 
-        }
+		// If Query
+		if( isQuery( arguments.collection ) ){
+			// TODO:
+		}
 
-        throw( 
-            message="Cannot create stream from incoming collection",
-            type="InvalidColletionType",
-            detail="#getMetadata( arguments.collection ).toString()#" 
-        );
-    }
+		throw( 
+			message="Cannot create stream from incoming collection",
+			type="InvalidColletionType",
+			detail="#getMetadata( arguments.collection ).toString()#" 
+		);
+	}
 
-    /**
-     * Returns a sequential ordered stream whose elements are the specified values.
-     * Each argument passed to this function will generate the stream from.
-     * 
-     */
-    Stream function of(){
-        if( arguments.isEmpty() ){
-            throw( message="Please pass at least one value", type="InvalidValues" );
-        }
-        return init( arrayNew( 1 ).append( arguments, true ) );
-    }
+	/**
+	 * Returns a sequential ordered stream whose elements are the specified values.
+	 * Each argument passed to this function will generate the stream from.
+	 * 
+	 */
+	Stream function of(){
+		if( arguments.isEmpty() ){
+			throw( message="Please pass at least one value", type="InvalidValues" );
+		}
+		
+		// Doing it this way so acf11 is supported
+		var sequence = [];
+		arguments.each( function( k,v ){
+			sequence.append( v );
+		} );
 
-    /**
-     * Create a character stream from a string
-     *
-     * @target The string to convert to a stream using its characters 
-     */
-    Stream function chars( required string target ){
-        variables.jStream = arguments.target.chars();
-        return this;
-    }
+		return init( sequence );
+	}
 
-    /**
-     * Create a stream from a file. Every line of the text becomes an element of the stream:
-     *
-     * @path The absolute path of the file to generate a stream from
-     */
-    Stream function file( required string path ){
+	/**
+	 * Create a character stream from a string
+	 * This won't work on ACF11 due to stupidity
+	 * 
+	 * @target The string to convert to a stream using its characters 
+	 */
+	Stream function ofChars( required string target ){
+		variables.jStream = arguments.target.chars();
+		return this;
+	}
 
-        variables.jStream = createObject( "java", "java.nio.file.Files" ).lines( 
-            createObject( "java", "java.nio.file.Paths" ).get( 
-                createObject( "java", "java.io.File" ).init( arguments.path ).toURI()
-            )
-        );
+	/**
+	 * Create a stream from a file. Every line of the text becomes an element of the stream:
+	 *
+	 * @path The absolute path of the file to generate a stream from
+	 */
+	Stream function ofFile( required string path ){
 
-        return this;
-    }
+		variables.jStream = createObject( "java", "java.nio.file.Files" ).lines( 
+			createObject( "java", "java.nio.file.Paths" ).get( 
+				createObject( "java", "java.io.File" ).init( arguments.path ).toURI()
+			)
+		);
 
-    /**
-     * Returns an infinite sequential unordered stream where each element is generated by the provided Supplier. 
-     * This is suitable for generating constant streams, streams of random elements, etc. Please make sure you limit
-     * your stream or this method will work until it reaches the memory limit. Use the <code>limit()</code>
-     * 
-     * @supplier A closure or lambda that will supply the generated elements
-     */
-    Stream function generate( required supplier ){
-        variables.jStream.generate( 
+		return this;
+	}
 
-            createDynamicProxy(
-                new proxies.Supplier( arguments.supplier ),
-                "java.util.function.Supplier"
-            )
+	/**
+	 * Returns an infinite sequential unordered stream where each element is generated by the provided Supplier. 
+	 * This is suitable for generating constant streams, streams of random elements, etc. Please make sure you limit
+	 * your stream or this method will work until it reaches the memory limit. Use the <code>limit()</code>
+	 * 
+	 * @supplier A closure or lambda that will supply the generated elements
+	 */
+	Stream function generate( required supplier ){
+		variables.jStream = variables.jStream.generate( 
 
-        );
-        return this;
-    }
+			createDynamicProxy(
+				new proxies.Supplier( arguments.supplier ),
+				[ "java.util.function.Supplier" ]
+			)
 
-    /**
-     * Returns a stream consisting of the elements of this stream, truncated to be no longer than maxSize in length.
-     * Please see warnings for parallel streams: https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#limit-long-
-     */
-    Stream function limit( required numeric maxSize ){
-        variables.jStream.limit( javaCast( "long", arguments.maxSize ) );
-        return this;
-    }
+		);
+		return this;
+	}
 
-    /**
-     * Returns an infinite sequential ordered Stream produced by iterative application of a function f to an initial element seed, 
-     * producing a Stream consisting of seed, f(seed), f(f(seed)), etc.
-     * The first element (position 0) in the Stream will be the provided seed. For n > 0, the element at position n, 
-     * will be the result of applying the function f to the element at position n - 1.
-     * 
-     * Each f receives the previous seed
-     * 
-     * @seed the initial element
-     * @f a function to be applied to to the previous element to produce a new element
-     * 
-     */
-    Stream function iterate( required seed, required f ){
-        variables.jStream.iterate( 
-            arguments.seed,
-            createDynamicProxy(
-                new proxies.UnaryOperator( arguments.f ),
-                "java.util.function.UnaryOperator"
-            )
+	/**
+	 * Returns an infinite sequential ordered Stream produced by iterative application of a function f to an initial element seed, 
+	 * producing a Stream consisting of seed, f(seed), f(f(seed)), etc.
+	 * The first element (position 0) in the Stream will be the provided seed. For n > 0, the element at position n, 
+	 * will be the result of applying the function f to the element at position n - 1.
+	 * 
+	 * Each f receives the previous seed
+	 * 
+	 * @seed the initial element
+	 * @f a function to be applied to to the previous element to produce a new element
+	 * 
+	 */
+	Stream function iterate( required seed, required f ){
+		variables.jStream = variables.jStream.iterate( 
+			arguments.seed,
+			createDynamicProxy(
+				new proxies.UnaryOperator( arguments.f ),
+				[ "java.util.function.UnaryOperator" ]
+			)
+		);
+		return this;
+	}
 
-        );
-        return this;
-    }
+	/**
+	 * Returns a sequential ordered IntStream from start (inclusive) to end (exclusive) by an incremental step of 1.
+	 * See https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html
+	 */
+	Stream function range( required numeric start, required numeric end ){
+		variables.jStream = variables.longStream.range(
+			javaCast( "long", arguments.start ),
+			javaCast( "long", arguments.end )
+		);
+		return this;
+	}
 
-    /**
-     * Returns a sequential ordered IntStream from start (inclusive) to end (exclusive) by an incremental step of 1.
-     * See https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html
-     */
-    Stream function range( required numeric start, required numeric end ){
-        variables.jStream = variables.longStream.range(
-            javaCast( "long", arguments.start ),
-            javaCast( "long", arguments.end )
-        );
-        return this;
-    }
+	/**
+	 * Returns a sequential ordered IntStream from start (inclusive) to end (inclusive) by an incremental step of 1.
+	 * See https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html
+	 */
+	Stream function rangeClosed( required numeric start, required numeric end ){
+		variables.jStream = variables.longStream.rangeClosed(
+			javaCast( "long", arguments.start ),
+			javaCast( "long", arguments.end )
+		);
+		return this;
+	}
 
-    /**
-     * Returns a sequential ordered IntStream from start (inclusive) to end (inclusive) by an incremental step of 1.
-     * See https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html
-     */
-    Stream function rangeClosed( required numeric start, required numeric end ){
-        variables.jStream = variables.longStream.range(
-            javaCast( "long", arguments.start ),
-            javaCast( "long", arguments.end )
-        );
-        return this;
-    }
+	/**************************************** OPERATIONS ****************************************/
 
-    /**************************************** OPERATIONS ****************************************/
+	/**
+	 * Returns a stream consisting of the elements of this stream, truncated to be no longer than maxSize in length.
+	 * Please see warnings for parallel streams: https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#limit-long-
+	 */
+	Stream function limit( required numeric maxSize ){
+		variables.jStream = variables.jStream.limit( javaCast( "long", arguments.maxSize ) );
+		return this;
+	}
+
+	/**
+	 * Returns a stream consisting of the distinct elements (according to Object.equals(Object)) of this stream.
+	 */
+	Stream function distinct(){
+		variables.jStream = variables.jStream.distinct();
+		return this;
+	}
+
+	/**
+	 * Returns a stream consisting of the remaining elements of this stream after discarding the first n elements of the stream. If this stream contains fewer than n elements then an empty stream will be returned. 
+	 * @n the number of leading elements to skip
+	 */
+	Stream function skip( required numeric n ){
+		variables.jStream = variables.jStream.skip( javaCast( "long", arguments.n ) );
+		return this;
+	}
+
+	/**
+	 * Returns a stream consisting of the elements of this stream, sorted according to natural order.
+	 */
+	Stream function sorted(){
+		variables.jStream = variables.jStream.sorted();
+		return this;
+	}
+
+	/**
+	 * Returns a stream consisting of the results of applying the given function to the elements of this stream. 
+	 * @mapper The closure or lambda to map apply to each element
+	 */
+	Stream function map( required mapper ){
+		variables.jStream = variables.jStream.iterate( 
+			createDynamicProxy(
+				new proxies.Mapper( arguments.mapper ),
+				[ "java.util.function.Supplier" ]
+			)
+		);
+	}
+	
+	/**************************************** TERMINATORS ****************************************/
+
+	/**
+	 * Returns an array containing the elements of this stream.
+	 */
+	function toArray(){
+		return variables.jStream.toArray();
+	}
 
 
+	/**
+	 * Returns the count of elements in this stream.
+	 */
+	numeric function count(){
+		return variables.jStream.count();
+	}
 
-    /**************************************** TERMINATORS ****************************************/
+	/**
+	 * This is a short-circuiting terminal operation. 
+	 * The behavior of this operation is explicitly nondeterministic; it is free to select any element in the stream. This is to allow for maximal performance in parallel operations; the cost is that multiple invocations on the same source may not return the same result. (If a stable result is desired, use findFirst() instead.)
+	 * 
+	 * @defaultValue Return this value if the return is null
+	 */
+	function findAny( defaultValue ){
+		var optional = variables.jStream.findAny();
+		return getNativeType( optional ) ?: defaultValue ?: javaCast( "null", "" );
+	}
 
+	/**
+	 * This is a short-circuiting terminal operation.
+	 * Returns an Optional describing the first element of this stream, or an empty Optional if the stream is empty. If the stream has no encounter order, then any element may be returned. 
+	 * 
+	 * @defaultValue Return this value if the return is null
+	 */
+	function findFirst( defaultValue ){
+		var optional = variables.jStream.findFirst();
+		return getNativeType( optional ) ?: defaultValue ?: javaCast( "null", "" );
+	}
 
+	/**
+	 * This method is in charge of detecting Java native types and converting them to CF Types from
+	 * Java Optionals
+	 * @optional The optional Java object https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html
+	 */
+	private function getNativeType( required optional ){
+		if( optional.isPresent() ){
+			var results 	= optional.get();
+			var className 	= results.getClass().getName();
+			var isEntrySet 	= isInstanceOf( results, "java.util.Map$Entry" ) OR isInstanceOf( results, "java.util.HashMap$Node" ); 
+
+			if( isEntrySet ){
+				return {
+					"#results.getKey()#" : results.getValue()
+ 				};
+			}
+
+			return results;
+		}
+	}
 }
