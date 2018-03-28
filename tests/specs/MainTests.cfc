@@ -58,10 +58,7 @@
 					} );
 				} );
 
-				given( 
-					skip=!server.keyExists( "lucee" ), 
-					given="a string", 
-					body=function(){
+				given( "a string", function(){
 					then( "it can create a character stream", function(){
 						var stream = new cbstreams.Stream().ofChars( "luis" );
 						expect( stream.count() ).toBe( 4 );
@@ -94,9 +91,7 @@
 			story( "I can limit streams", function(){
 				given( "a discrete stream", function(){
 					then( "it can be limited", function(){
-						var stream = new cbstreams.Stream()
-							.range( 1, 4 )
-							.limit( 1 );
+						var stream = new cbstreams.Stream( "1,2,3,4" ).limit( 1 );
 						expect( stream.count() ).toBe( 1 );
 					} );
 				} );
@@ -136,17 +131,84 @@
 			story( "I can leverage map functions", function(){
 				given( "a stream with a map() call", function(){
 					then( "it will transform the elements", function(){
-						var stream = new cbstreams.Stream( "abc1,abc2,abc3" );
-
-						var r = stream.skip( 1 )
+						var aStream = new cbstreams.Stream( "abc1,abc2,abc3" )
 							.map( function( element ){
 								return element.substring( 0, 3 );
-							} )
-							.sorted()
-							.count();
+							})
+							.limit( 1 )
+							.toArray();
+						expect( aStream[ 1 ] ).toBe( "abc" );
+					} );
+				} );
+			} );
 
-						writeDump( var=r );
-						writeDump( var=stream.toArray() );
+			story( "I can leverage filter functions", function(){
+				given( "a stream with a filter() call", function(){
+					then( "it will filter the elements", function(){
+						var aStream = new cbstreams.Stream( "abc1,abc2,abc3" )
+							.filter( function( element ){
+								return findNoCase( "abc1", element );
+							})
+							.toArray();
+						expect( aStream[ 1 ] ).toBe( "abc1" );
+					} );
+				} );
+			} );
+
+			story( "I can leverage reduce functions", function(){
+				given( "a stream with a reduce() call with an accumulator only", function(){
+					then( "it will reduce the elements", function(){
+						var reduced = new cbstreams.Stream( "1,2,3" )
+							.reduce( function( a, b ){
+								return a + b;
+							});
+						//debug( reduced );
+						// 1+2+3 = 6
+						expect( reduced ).toBe( 6 );
+					} );
+				} );
+
+				given( "a stream with a reduce() call with an accumulator and a seed", function(){
+					then( "it will reduce the elements with the seed", function(){
+						var reduced = new cbstreams.Stream( "1,2,3" )
+							.reduce( function( a, b ){
+								return a + b;
+							}, 10 );
+						//debug( reduced );
+						// 10+1+2+3 = 16
+						expect( reduced ).toBe( 16 );
+					} );
+				} );
+			} );
+
+			story( "I can create an empty stream", function(){
+				given( "A call to empty()", function(){
+					then( "it will create an empty sequential stream", function(){
+						var stream = new cbstreams.Stream().empty();
+						expect( stream.count() ).toBe( 0 );
+					} );
+				} );
+			} );
+
+			story( "I can create a stream a leverage the forEach functions", function(){
+				given( "A basic stream with a forEach", function(){
+					then( "I can output it to the debug console", function(){
+						var stream = new cbStreams.Stream( "luis,alexia,lucas" );
+						var output = [];
+						stream.forEach( function( element ){
+							output.append( element );
+						});
+						expect( output.len() ).toBe( 3 );
+					} );
+				} );
+				given( "An ordered stream with a forEachOrdered", function(){
+					then( "I can output it to the debug console", function(){
+						var stream = new cbStreams.Stream( "luis,alexia,lucas" );
+						var output = [];
+						stream.forEachOrdered( function( element ){
+							output.append( element );
+						});
+						expect( output.len() ).toBe( 3 );
 					} );
 				} );
 			} );

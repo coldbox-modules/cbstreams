@@ -5,6 +5,7 @@ component accessors="true"{
 
 	// Static Stream Class Access
 	variables.coreStream    = createObject( "java", "java.util.stream.Stream" );
+	variables.intStream    	= createObject( "java", "java.util.stream.IntStream" );
 	variables.longStream    = createObject( "java", "java.util.stream.LongStream" );
 	variables.Arrays        = createObject( "java", "java.util.Arrays" );
 
@@ -87,7 +88,13 @@ component accessors="true"{
 	 * @target The string to convert to a stream using its characters 
 	 */
 	Stream function ofChars( required string target ){
-		variables.jStream = arguments.target.chars();
+		if( variables.isLucee ){
+			variables.jStream = arguments.target.chars();
+		} else {
+			variables.jStream = variables.Arrays.stream( 
+				javaCast( "java.lang.Object[]", listToArray( arguments.target, "" ) )
+			);
+		}
 		return this;
 	}
 
@@ -154,9 +161,9 @@ component accessors="true"{
 	 * See https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html
 	 */
 	Stream function range( required numeric start, required numeric end ){
-		variables.jStream = variables.longStream.range(
-			javaCast( "long", arguments.start ),
-			javaCast( "long", arguments.end )
+		variables.jStream = variables.longStream.range( 
+			javaCast( "long", arguments.start ), 
+			javaCast( "long", arguments.end ) 
 		);
 		return this;
 	}
@@ -170,6 +177,14 @@ component accessors="true"{
 			javaCast( "long", arguments.start ),
 			javaCast( "long", arguments.end )
 		);
+		return this;
+	}
+
+	/**
+	 * Returns an empty sequential Stream.
+	 */
+	Stream function empty(){
+		variables.jStream = variables.coreStream.empty();
 		return this;
 	}
 
@@ -214,12 +229,30 @@ component accessors="true"{
 	 * @mapper The closure or lambda to map apply to each element
 	 */
 	Stream function map( required mapper ){
-		variables.jStream = variables.jStream.iterate( 
-			createDynamicProxy(
-				new proxies.Mapper( arguments.mapper ),
-				[ "java.util.function.Supplier" ]
+		variables.jStream = variables.jStream.map(
+			createDynamicProxy( 
+				new proxies.Function( arguments.mapper ), 
+				[ "java.util.function.Function" ] 
 			)
 		);
+		return this;
+	}
+
+	/**
+	 * Returns a stream consisting of the elements of this stream that match the given predicate. 
+	 * 
+	 * This is an intermediate operation.
+	 * 
+	 * @predicate a non-interfering, stateless predicate to apply to each element to determine if it should be included
+	 */
+	Stream function filter( required predicate ){
+		variables.jStream = variables.jStream.filter(
+			createDynamicProxy( 
+				new proxies.Predicate( arguments.predicate ), 
+				[ "java.util.function.Predicate" ] 
+			)
+		);
+		return this;
 	}
 	
 	/**************************************** TERMINATORS ****************************************/
@@ -247,38 +280,126 @@ component accessors="true"{
 	 */
 	function findAny( defaultValue ){
 		var optional = variables.jStream.findAny();
-		return getNativeType( optional ) ?: defaultValue ?: javaCast( "null", "" );
+		return getNativeTypeFromOptional( optional ) ?: defaultValue ?: javaCast( "null", "" );
 	}
 
 	/**
 	 * This is a short-circuiting terminal operation.
+	 * 
 	 * Returns an Optional describing the first element of this stream, or an empty Optional if the stream is empty. If the stream has no encounter order, then any element may be returned. 
 	 * 
 	 * @defaultValue Return this value if the return is null
 	 */
 	function findFirst( defaultValue ){
 		var optional = variables.jStream.findFirst();
-		return getNativeType( optional ) ?: defaultValue ?: javaCast( "null", "" );
+		return getNativeTypeFromOptional( optional ) ?: defaultValue ?: javaCast( "null", "" );
 	}
+
+	/**
+	 * Performs an action for each element of this stream. 
+	 * 
+	 * This is a terminal operation.
+	 * 
+	 * The behavior of this operation is explicitly nondeterministic. For parallel stream pipelines, this operation does not guarantee to respect the encounter order of the stream, as doing so would sacrifice the benefit of parallelism. For any given element, the action may be performed at whatever time and in whatever thread the library chooses. If the action accesses shared state, it is responsible for providing the required synchronization.
+	 * 
+	 * @action a non-interfering action to perform on the elements 
+	 */
+	void function forEach( required action ){
+		variables.jStream.forEach(
+			createDynamicProxy( 
+				new proxies.Consumer( arguments.action ), 
+				[ "java.util.function.Consumer" ] 
+			)
+		);
+	}
+
+	/**
+	 * Performs an action for each element of this stream, in the encounter order of the stream if the stream has a defined encounter order. 
+	 * 
+	 * This is a terminal operation.
+	 * 
+	 * This operation processes the elements one at a time, in encounter order if one exists. Performing the action for one element happens-before performing the action for subsequent elements, but for any given element, the action may be performed in whatever thread the library chooses.
+	 * 
+	 * @action a non-interfering action to perform on the elements 
+	 */
+	void function forEachOrdered( required action ){
+		variables.jStream.forEachOrdered(
+			createDynamicProxy( 
+				new proxies.Consumer( arguments.action ), 
+				[ "java.util.function.Consumer" ] 
+			)
+		);
+	}
+
+	/**
+	 * Performs a reduction on the elements of this stream.
+	 * 
+	 * This function can run the reduction in 3 modes:
+	 * 1 - Accumulation only: Using the accumulation function, and returns the reduced value, if any.
+	 * 2 - Accumulation with identity value: Performs a reduction on the elements of this stream, using the provided identity or starting value and an associative accumulation function, and returns the reduced value
+	 * 
+	 * This is a terminal operation.
+	 * 
+	 * @accumulator an associative, non-interfering, stateless function for combining two values
+	 * @identity the identity value for the accumulating function. If not used, then the accumulator is used in isolation
+	 * @defaultValue The default value to return if the reduce() operations prodces a null value
+	 */
+	function reduce( required accumulator, identity, defaultValue ){
+		var proxy = createDynamicProxy( 
+			new proxies.BinaryOperator( arguments.accumulator ), 
+			[ "java.util.function.BinaryOperator" ] 
+		);
+
+		// Accumulator Only
+		if( isNull( arguments.identity ) ){
+			var optional = variables.jStream.reduce( proxy );
+			return getNativeTypeFromOptional( optional ) ?: defaultValue ?: javaCast( "null", "" );
+		} 
+		// Accumulator + Identity Seed
+		else {
+			var results = variables.jStream.reduce( arguments.identity, proxy );
+			return getNativeType( results ) ?: defaultValue ?: javaCast( "null", "" );
+		}
+
+		
+	}
+
+	/************************************ PRIVATE ************************************/
+
 
 	/**
 	 * This method is in charge of detecting Java native types and converting them to CF Types from
 	 * Java Optionals
+	 * 
 	 * @optional The optional Java object https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html
 	 */
-	private function getNativeType( required optional ){
+	private function getNativeTypeFromOptional( required optional ){
+		// Only return results if value is present, else produces a null
 		if( optional.isPresent() ){
 			var results 	= optional.get();
-			var className 	= results.getClass().getName();
-			var isEntrySet 	= isInstanceOf( results, "java.util.Map$Entry" ) OR isInstanceOf( results, "java.util.HashMap$Node" ); 
-
-			if( isEntrySet ){
-				return {
-					"#results.getKey()#" : results.getValue()
- 				};
-			}
-
-			return results;
+			return getNativeType( results );
 		}
+	}
+
+	/**
+	 * Return a native CF type from incoming Java type
+	 * 
+	 * @results The native Java return
+	 */
+	private function getNativeType( results ){
+		if( isNull( arguments.results ) ){
+			return;
+		}
+
+		var className 	= arguments.results.getClass().getName();
+		var isEntrySet 	= isInstanceOf( arguments.results, "java.util.Map$Entry" ) OR isInstanceOf( arguments.results, "java.util.HashMap$Node" ); 
+
+		if( isEntrySet ){
+			return {
+				"#arguments.results.getKey()#" : arguments.results.getValue()
+			};
+		}
+
+		return arguments.results;
 	}
 }

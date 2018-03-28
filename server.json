@@ -1,5 +1,6 @@
 {
+    "name":"streams-adobe2016",
     "app":{
-        "cfengine":"adobe@11"
+        "cfengine":"adobe@2016"
     }
 }

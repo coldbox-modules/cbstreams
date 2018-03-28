@@ -1,3 +1,7 @@
+/**
+ * Functional interface that maps to java.util.function.UnaryOperator
+ * See https://docs.oracle.com/javase/8/docs/api/java/util/function/UnaryOperator.html
+ */
 component{ 
 
     /**
@@ -17,4 +21,10 @@ component{
     function apply( required target ){
         return variables.target( arguments.target );
     }
+
+    function andThen( required after ){}
+
+    function compose( required before ){}
+
+    function identity(){}
 }
