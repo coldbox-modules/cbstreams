@@ -259,10 +259,22 @@
 
 				beforeEach( function(){
 					people = [
-						{ name = "luis", id = 1, when = now() },
-						{ name = "alexia", id = 2, when = now() },
-						{ name = "lucas", id = 2, when = now() }
+						{ name = "luis", id = 1, when = now(), price="30" },
+						{ name = "alexia", id = 2, when = now(), price="25" },
+						{ name = "lucas", id = 2, when = now(), price="30" }
 					];
+				} );
+
+				given( "The groupingBy collection", function(){
+					then( "it will produce a grouped result", function(){
+						var aPeople = new cbStreams.Stream( people )
+							.collectGroupingBy( function( item ){
+								return item.price;
+							} );
+						
+						expect( aPeople[ 25 ] ).toHaveLength( 1 );
+						expect( aPeople[ 30 ] ).toHaveLength( 2 );
+					} );
 				} );
 
 				given( "The default array collector", function(){
@@ -297,8 +309,8 @@
 						
 						var results = new cbStreams.Stream( people )
 							.collectAsStruct( "id", "name" );
-
-						writeDump( var=results );abort;
+						expect( results )
+							.toBeStruct();
 					} );
 				} );
 			} );

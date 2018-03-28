@@ -242,9 +242,22 @@ component accessors="true"{
 
 	/**
 	 * Returns a stream consisting of the elements of this stream, sorted according to natural order.
+	 * 
+	 * You can pass in a lambda or closure to create your own Comparator.
+	 * 
+	 * @comparator A lambda or closure to apply as a comparator when sorting.
 	 */
-	Stream function sorted(){
-		variables.jStream = variables.jStream.sorted();
+	Stream function sorted( comparator ){
+		if( isNull( arguments.comparator ) ){
+			variables.jStream = variables.jStream.sorted();
+		} else {
+			variables.jStream = variables.jStream.sorted(
+				createDynamicProxy( 
+					new proxies.Comparator( arguments.comparator ), 
+					[ "java.util.Comparator" ] 
+				)
+			);
+		}
 		return this;
 	}
 
@@ -427,113 +440,181 @@ component accessors="true"{
 	 * A mutable reduction operation that accumulates input elements into a mutable result container, optionally transforming the accumulated result into a final representation after all input elements have been processed. 
 	 * By default we will collect to an array.
 	 * 
-	 * NOTE: the struct type will only work if the collection we are collecting is a struct or an object
-	 * 
 	 * This is a terminal operation.
 	 * 
-	 * @type The type to collect: array, list or struct
-	 * @keyID If using struct, then we need to know what will be the key value in the collection struct
-	 * @valueID If using struct, then we need to know what will be the value key in the collection struct
-	 * @overwrite If using struct, then do you overwrite elements if the same key id is found. Defaults is true.
-	 * @delimiter The delimiter to use in the list. The default is a comma (,)
-	 * 
 	 */
-	function collect( 
-		type="array", 
-		string keyID, 
-		string valueID,
-		boolean overwrite=true,
-		delimiter="," 
-	){
+	function collect(){
+		return variables.jStream.collect( variables.Collectors.toList() );
+	}
 
-		switch( arguments.type ){
-			// STRUCT
-			case "struct" : {
-				if( isNull( arguments.keyID ) || isNull( arguments.valueID ) ){
-					throw( "Please pass in a 'keyID' and a 'valueID', if not we cannot build your struct." );
-				}
+	/**
+	 * Returns a Collector implementing a "group by" operation on input elements, grouping elements according to a 
+	 * classification function, and returning the results in a struct according to the classifier function
+	 * 
+	 * @classifier the classifier function mapping input elements to keys
+	 */
+	function collectGroupingBy( required classifier ){
+		return variables.jStream.collect( variables.Collectors.groupingBy(
+			createDynamicProxy(
+				new proxies.Function( arguments.classifier ),
+				[ "java.util.function.Function" ]
+			)
+		) );
+	}
 
-				var keyFunction = createDynamicProxy(
-					new proxies.Function( function( item ){
-						// If CFC, execute the method
-						if( isObject( arguments.item ) ){
-							return invoke( arguments.item, keyID );
-						} 
-						// If struct, get the key
-						else if( isStruct( arguments.item ) ){
-							return arguments.item[ keyID ];
-						}
-						// Else, just return the item, nothing we can map
-						return arguments.item;
-					} ),
-					[ "java.util.function.Function" ]
-				);
-
-				var valueFunction = createDynamicProxy(
-					new proxies.Function( function( item ){
-						// If CFC, execute the method
-						if( isObject( arguments.item ) ){
-							return invoke( arguments.item, valueID );
-						}
-						// If struct, get the key
-						else if( isStruct( arguments.item ) ){
-							return arguments.item[ valueID ];
-						}
-						// Else, just return the item, nothing we can map
-						return arguments.item;
-					} ),
-					[ "java.util.function.Function" ]
-				);
-
-				var overrideFunction = createDynamicProxy(
-					new proxies.BinaryOperator( function( oldValue, newValue ){
-						return ( overwrite ? newValue : oldValue );
-					} ),
-					[ "java.util.function.BinaryOperator" ]
-				);
-				
-				return variables.jStream.collect(
-					variables.Collectors.toMap( keyFunction, valueFunction, overrideFunction )
-				);
+	/**
+	 * Returns a Collector that produces the arithmetic mean of an integer-valued function applied to the input elements. 
+	 * If no elements are present, the result is 0.
+	 * 
+	 * @mapper The mapper lambda or closure to determine averages on
+	 * @primitive The primitive type to cast with, we default to 'long'. Accepted values are int, long, double
+	 */
+	function collectAveraging( required mapper, primitive="long" ){
+		var proxy = createPrimitiveProxyFunction( arguments.mapper, arguments.primitive );
+		switch( arguments.primitive ){
+			case "int" : {
+				return variables.jStream.collect( variables.Collectors.averagingInt( proxy ) );
 			}
-
-			// Simple String Lists
-			case "list" : {
-				return arrayToList( 
-					variables.jStream.collect( variables.Collectors.toList() ),
-					arguments.delimiter
-				);
+			case "double" :{
+				return variables.jStream.collect( variables.Collectors.averagingDouble( proxy ) );
 			}
-
-			// ARRAYS
 			default : {
-				return variables.jStream.collect( variables.Collectors.toList() );
+				return variables.jStream.collect( variables.Collectors.averagingLong( proxy ) );
+			}
+		}
+	}
+
+	/**
+	 * Returns a Collector that produces the sum of a valued function applied to the input elements.
+	 * 
+	 * @mapper The mapper lambda or closure to determine the sum on
+	 * @primitive The primitive type to cast with, we default to 'long'. Accepted values are int, long, double
+	 */
+	function collectSumming( required mapper, primitive="long" ){
+		var proxy = createPrimitiveProxyFunction( arguments.mapper, arguments.primitive );
+		switch( arguments.primitive ){
+			case "int" : {
+				return variables.jStream.collect( variables.Collectors.summingInt( proxy ) );
+			}
+			case "double" :{
+				return variables.jStream.collect( variables.Collectors.summingDouble( proxy ) );
+			}
+			default : {
+				return variables.jStream.collect( variables.Collectors.summingLong( proxy ) );
+			}
+		}
+	}
+
+	/**
+	 * Returns a Collector which applies an producing mapping function to each input element, and returns summary statistics for the resulting values.
+	 * 
+	 * @mapper The mapper lambda or closure to determine the statistics on
+	 * @primitive The primitive type to cast with, we default to 'long'. Accepted values are int, long, double
+	 */
+	function collectSummarizing( required mapper, primitive="long" ){
+		var proxy = createPrimitiveProxyFunction( arguments.mapper, arguments.primitive );
+		switch( arguments.primitive ){
+			case "int" : {
+				return variables.jStream.collect( variables.Collectors.summarizingInt( proxy ) );
+			}
+			case "double" :{
+				return variables.jStream.collect( variables.Collectors.summarizingDouble( proxy ) );
+			}
+			default : {
+				return variables.jStream.collect( variables.Collectors.summarizingLong( proxy ) );
 			}
 		}
 	}
 	
-	// Shortcut Collectors
-
 	/**
-	 * Collect the items to a string list
+	 * Collect the items to a string list using delimiters and/or a prefix and suffix.
+	 * The cool things is that you don't even need to know the start or end of the stream for applying the prefix and suffix
+	 * 
+	 * This is a terminal operation.
 	 * 
 	 * @delimiter The delimiter to use in the list. The default is a comma (,)
+	 * @prefix A prefix to add to the stream result
+	 * @suffix A suffix to add to the stream result
 	 */
-	function collectAsList( delimiter="," ){
-		arguments.type = "list";
-		return collect( argumentCollection=arguments );
+	function collectAsList( delimiter=",", prefix="", suffix="" ){
+		return variables.jStream.collect(
+			variables.Collectors.joining( arguments.delimiter, arguments.prefix, arguments.suffix )
+		);
 	}
 
 	/**
 	 * Collect the items to a struct. Please be sure to map the appropriate key and value identifiers
+	 * 
+	 * NOTE: the struct type will only work if the collection we are collecting is a struct or an object
+	 * This is a terminal operation.
 	 * 
 	 * @keyID If using struct, then we need to know what will be the key value in the collection struct
 	 * @valueID If using struct, then we need to know what will be the value key in the collection struct
 	 * @overwrite If using struct, then do you overwrite elements if the same key id is found. Defaults is true.
 	 */
 	function collectAsStruct( required keyID, required valueID, boolean overwrite=true ){
-		arguments.type = "struct";
-		return collect( argumentCollection=arguments );
+		if( isNull( arguments.keyID ) || isNull( arguments.valueID ) ){
+			throw( "Please pass in a 'keyID' and a 'valueID', if not we cannot build your struct." );
+		}
+
+		var keyFunction = createDynamicProxy(
+			new proxies.Function( function( item ){
+				// If CFC, execute the method
+				if( isObject( arguments.item ) ){
+					return invoke( arguments.item, keyID );
+				} 
+				// If struct, get the key
+				else if( isStruct( arguments.item ) ){
+					return arguments.item[ keyID ];
+				}
+				// Else, just return the item, nothing we can map
+				return arguments.item;
+			} ),
+			[ "java.util.function.Function" ]
+		);
+
+		var valueFunction = createDynamicProxy(
+			new proxies.Function( function( item ){
+				// If CFC, execute the method
+				if( isObject( arguments.item ) ){
+					return invoke( arguments.item, valueID );
+				}
+				// If struct, get the key
+				else if( isStruct( arguments.item ) ){
+					return arguments.item[ valueID ];
+				}
+				// Else, just return the item, nothing we can map
+				return arguments.item;
+			} ),
+			[ "java.util.function.Function" ]
+		);
+
+		var overrideFunction = createDynamicProxy(
+			new proxies.BinaryOperator( function( oldValue, newValue ){
+				return ( overwrite ? newValue : oldValue );
+			} ),
+			[ "java.util.function.BinaryOperator" ]
+		);
+		
+		return variables.jStream.collect(
+			variables.Collectors.toMap( keyFunction, valueFunction, overrideFunction )
+		);
+	}
+
+	/**
+	 * Returns a Collector which partitions the input elements according to a Predicate, and organizes them into a Map<Boolean, List<T>>.
+	 * 
+	 * @predicate a non-interfering, stateless predicate to apply to each element to determine if it should be included
+	 */
+	function collectPartitioningBy( required predicate ){
+		return variables.jStream.collect(
+			variables.Collectors.partitioningBy(
+				createDynamicProxy( 
+					new proxies.Predicate( arguments.predicate ), 
+					[ "java.util.function.Predicate" ] 
+				)
+			)
+		);
 	}
 
 	/************************************ PRIVATE ************************************/
@@ -573,5 +654,34 @@ component accessors="true"{
 		}
 
 		return arguments.results;
+	}
+
+	/**
+	 * Create a primitive typed proxy function
+	 *
+	 * @f The target closure or lambda
+	 * @primitive The target primitive
+	 */
+	private function createPrimitiveProxyFunction( required f, required primitive ){
+		switch( arguments.primitive ){
+			case "int" : {
+				return createDynamicProxy(
+					new proxies.ToIntFunction( arguments.f ),
+					[ "java.util.function.ToIntFunction" ]
+				);
+			}
+			case "double" :{
+				return createDynamicProxy(
+					new proxies.ToDoubleFunction( arguments.f ),
+					[ "java.util.function.ToDoubleFunction" ]
+				);
+			}
+			default : {
+				return createDynamicProxy(
+					new proxies.ToLongFunction( arguments.f ),
+					[ "java.util.function.ToLongFunction" ]
+				);
+			}
+		}
 	}
 }

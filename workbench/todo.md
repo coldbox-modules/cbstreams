@@ -7,7 +7,7 @@ This is the implementation roadmap.
 √ allMatch
 √ anyMatch
 - builder
-- collect
+√ collect
 - concat
 √ count
 √ distinct
@@ -31,6 +31,7 @@ This is the implementation roadmap.
 - reduce with accumulator and collection ( needs parallel )
 √ skip
 √ sorted
+√ sorted with comparator
 √ toArray
 - close
 - isParallel
@@ -40,3 +41,12 @@ This is the implementation roadmap.
 - sequential
 - spliterator
 - unordered
+
+## Collections
+
+√ averagingInt()
+√ summingInt()
+√ summarizingInt()
+√ groupingBy()
+√ partitioningBy()
+
