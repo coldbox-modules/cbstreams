@@ -7,6 +7,7 @@ component accessors="true"{
 	variables.coreStream    = createObject( "java", "java.util.stream.Stream" );
 	variables.intStream    	= createObject( "java", "java.util.stream.IntStream" );
 	variables.longStream    = createObject( "java", "java.util.stream.LongStream" );
+	variables.Collectors    = createObject( "java", "java.util.stream.Collectors" );
 	variables.Arrays        = createObject( "java", "java.util.Arrays" );
 
 	// Lucee pivot
@@ -161,10 +162,19 @@ component accessors="true"{
 	 * See https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html
 	 */
 	Stream function range( required numeric start, required numeric end ){
-		variables.jStream = variables.longStream.range( 
-			javaCast( "long", arguments.start ), 
-			javaCast( "long", arguments.end ) 
-		);
+		if( variables.isLucee ){
+			variables.jStream = variables.longStream.range(
+				javaCast( "long", arguments.start ),
+				javaCast( "long", arguments.end )
+			);
+		} else {
+			var a = [];
+			for( var x = arguments.start; x lt arguments.end; x++ ){
+				a.append( x );
+			}
+			init( a );
+		}
+
 		return this;
 	}
 
@@ -173,10 +183,19 @@ component accessors="true"{
 	 * See https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html
 	 */
 	Stream function rangeClosed( required numeric start, required numeric end ){
-		variables.jStream = variables.longStream.rangeClosed(
-			javaCast( "long", arguments.start ),
-			javaCast( "long", arguments.end )
-		);
+		if( variables.isLucee ){
+			variables.jStream = variables.longStream.rangeClosed(
+				javaCast( "long", arguments.start ),
+				javaCast( "long", arguments.end )
+			);
+		} else {
+			var a = [];
+			for( var x = arguments.start; x lte arguments.end; x++ ){
+				a.append( x );
+			}
+			init( a );
+		}
+		
 		return this;
 	}
 
@@ -184,7 +203,12 @@ component accessors="true"{
 	 * Returns an empty sequential Stream.
 	 */
 	Stream function empty(){
-		variables.jStream = variables.coreStream.empty();
+		if( variables.isLucee ){
+			variables.jStream = variables.coreStream.empty();
+		} else {
+			init();
+		}
+
 		return this;
 	}
 
@@ -360,8 +384,156 @@ component accessors="true"{
 			var results = variables.jStream.reduce( arguments.identity, proxy );
 			return getNativeType( results ) ?: defaultValue ?: javaCast( "null", "" );
 		}
-
 		
+	}
+
+	/**
+	 * Returns whether any elements of this stream match the provided predicate. 
+	 * May not evaluate the predicate on all elements if not necessary for determining the result. 
+	 * If the stream is empty then false is returned and the predicate is not evaluated. 
+	 * 
+	 * This is a terminal operation.
+	 * 
+	 * @predicate a non-interfering, stateless predicate to apply to elements of this stream
+	 */
+	boolean function anyMatch( required predicate ){
+		return variables.jStream.anyMatch(
+			createDynamicProxy( 
+				new proxies.Predicate( arguments.predicate ), 
+				[ "java.util.function.Predicate" ] 
+			)
+		);
+	}
+
+	/**
+	 * Returns whether all elements of this stream match the provided predicate. 
+	 * May not evaluate the predicate on all elements if not necessary for determining the result. 
+	 * If the stream is empty then true is returned and the predicate is not evaluated. 
+	 * 
+	 * This is a terminal operation.
+	 * 
+	 * @predicate a non-interfering, stateless predicate to apply to elements of this stream
+	 */
+	boolean function allMatch( required predicate ){
+		return variables.jStream.allMatch(
+			createDynamicProxy( 
+				new proxies.Predicate( arguments.predicate ), 
+				[ "java.util.function.Predicate" ] 
+			)
+		);
+	}
+
+	/**
+	 * A mutable reduction operation that accumulates input elements into a mutable result container, optionally transforming the accumulated result into a final representation after all input elements have been processed. 
+	 * By default we will collect to an array.
+	 * 
+	 * NOTE: the struct type will only work if the collection we are collecting is a struct or an object
+	 * 
+	 * This is a terminal operation.
+	 * 
+	 * @type The type to collect: array, list or struct
+	 * @keyID If using struct, then we need to know what will be the key value in the collection struct
+	 * @valueID If using struct, then we need to know what will be the value key in the collection struct
+	 * @overwrite If using struct, then do you overwrite elements if the same key id is found. Defaults is true.
+	 * @delimiter The delimiter to use in the list. The default is a comma (,)
+	 * 
+	 */
+	function collect( 
+		type="array", 
+		string keyID, 
+		string valueID,
+		boolean overwrite=true,
+		delimiter="," 
+	){
+
+		switch( arguments.type ){
+			// STRUCT
+			case "struct" : {
+				if( isNull( arguments.keyID ) || isNull( arguments.valueID ) ){
+					throw( "Please pass in a 'keyID' and a 'valueID', if not we cannot build your struct." );
+				}
+
+				var keyFunction = createDynamicProxy(
+					new proxies.Function( function( item ){
+						// If CFC, execute the method
+						if( isObject( arguments.item ) ){
+							return invoke( arguments.item, keyID );
+						} 
+						// If struct, get the key
+						else if( isStruct( arguments.item ) ){
+							return arguments.item[ keyID ];
+						}
+						// Else, just return the item, nothing we can map
+						return arguments.item;
+					} ),
+					[ "java.util.function.Function" ]
+				);
+
+				var valueFunction = createDynamicProxy(
+					new proxies.Function( function( item ){
+						// If CFC, execute the method
+						if( isObject( arguments.item ) ){
+							return invoke( arguments.item, valueID );
+						}
+						// If struct, get the key
+						else if( isStruct( arguments.item ) ){
+							return arguments.item[ valueID ];
+						}
+						// Else, just return the item, nothing we can map
+						return arguments.item;
+					} ),
+					[ "java.util.function.Function" ]
+				);
+
+				var overrideFunction = createDynamicProxy(
+					new proxies.BinaryOperator( function( oldValue, newValue ){
+						return ( overwrite ? newValue : oldValue );
+					} ),
+					[ "java.util.function.BinaryOperator" ]
+				);
+				
+				return variables.jStream.collect(
+					variables.Collectors.toMap( keyFunction, valueFunction, overrideFunction )
+				);
+			}
+
+			// Simple String Lists
+			case "list" : {
+				return arrayToList( 
+					variables.jStream.collect( variables.Collectors.toList() ),
+					arguments.delimiter
+				);
+			}
+
+			// ARRAYS
+			default : {
+				return variables.jStream.collect( variables.Collectors.toList() );
+			}
+		}
+	}
+	
+	// Shortcut Collectors
+
+	/**
+	 * Collect the items to a string list
+	 * 
+	 * @delimiter The delimiter to use in the list. The default is a comma (,)
+	 */
+	function collectAsList( delimiter="," ){
+		arguments.type = "list";
+		return collect( argumentCollection=arguments );
+	}
+
+	/**
+	 * Collect the items to a struct. Please be sure to map the appropriate key and value identifiers
+	 * 
+	 * @keyID If using struct, then we need to know what will be the key value in the collection struct
+	 * @valueID If using struct, then we need to know what will be the value key in the collection struct
+	 * @overwrite If using struct, then do you overwrite elements if the same key id is found. Defaults is true.
+	 */
+	function collectAsStruct( required keyID, required valueID, boolean overwrite=true ){
+		arguments.type = "struct";
+		return collect( argumentCollection=arguments );
 	}
 
 	/************************************ PRIVATE ************************************/

@@ -213,6 +213,96 @@
 				} );
 			} );
 
+			story( "I can find a match in a stream with short-cicuiting activities", function(){
+				given( "A call to anyMatch() with a match", function(){
+					then( "will produce true", function(){
+						var results = new cbstreams.Stream( "1,2,3" )
+							.anyMatch( function( count ){
+								return count gt 1;
+							} );
+						expect( results ).toBeTrue();
+					} );
+				} );
+				given( "A call to anyMatch() without a match", function(){
+					then( "will not produce", function(){
+						var results = new cbstreams.Stream( "1,2,3" )
+							.anyMatch( function( count ){
+								return count gt 10;
+							} );
+						expect( results ).toBeFalse();
+					} );
+				} );
+			} );
+
+			story( "I can find all matches in a stream with short-cicuiting activities", function(){
+				given( "A call to allMatch() with a match", function(){
+					then( "will produce true", function(){
+						var results = new cbstreams.Stream( "1,2,3" )
+							.allMatch( function( count ){
+								return count lt 4;
+							} );
+						expect( results ).toBeTrue();
+					} );
+				} );
+				given( "A call to allMatch() without a match", function(){
+					then( "will not produce", function(){
+						var results = new cbstreams.Stream( "1,2,3" )
+							.allMatch( function( count ){
+								return count gt 10;
+							} );
+						expect( results ).toBeFalse();
+					} );
+				} );
+			} );
+
+			story( "I can collect streams into different types", function(){
+
+				beforeEach( function(){
+					people = [
+						{ name = "luis", id = 1, when = now() },
+						{ name = "alexia", id = 2, when = now() },
+						{ name = "lucas", id = 2, when = now() }
+					];
+				} );
+
+				given( "The default array collector", function(){
+					then( "it will produce an array collection", function(){
+						var aNames = new cbStreams.Stream( people )
+							.map( function( element ){
+								return element.name;
+							} )
+							.sorted()
+							.collect();
+						
+						expect( aNames ).toHaveLength( 3 ).toBeArray();
+					} );
+				} );
+
+				given( "The list collector", function(){
+					then( "it will produce a string list of the collection", function(){
+						var aNames = new cbStreams.Stream( people )
+							.map( function( element ){
+								return element.name;
+							} )
+							.sorted()
+							.collectAsList( "|" );
+						
+						expect( aNames ).toBeString();
+						expect( listLen( aNames, "|" ) ).toBe( 3 );
+					} );
+				} );
+
+				given( "The struct collector and a key and id mapper", function(){
+					then( "it will produce a struct of the collection of those mappers", function(){
+						
+						var results = new cbStreams.Stream( people )
+							.collectAsStruct( "id", "name" );
+
+						writeDump( var=results );abort;
+					} );
+				} );
+			} );
+
 		});
 
 	}

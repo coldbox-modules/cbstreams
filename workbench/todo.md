@@ -4,8 +4,8 @@ This is the implementation roadmap.
 
 ## Stream Class
 
-- allMatch
-- anyMatch
+√ allMatch
+√ anyMatch
 - builder
 - collect
 - concat
