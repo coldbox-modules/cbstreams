@@ -1,8 +1,12 @@
 # Todo
 
-This is the implementation roadmap.
+This is the implementation roadmap for streams:
 
-## Stream Class
+- https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#peek-java.util.function.Consumer-
+- https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collectors.html
+- https://docs.oracle.com/javase/8/docs/api/java/util/Arrays.html
+
+## Stream Class Implementations
 
 √ allMatch
 √ anyMatch
@@ -40,14 +44,14 @@ This is the implementation roadmap.
 √ spliterator
 √ unordered
 
-## Predicate Streams
+## Predicate Typed Streams
 
 √ average
 √ summaryStatistics
 √ max
 √ min
 
-## Collections
+## Collectors
 
 √ averagingInt()
 √ summingInt()
