@@ -5,7 +5,12 @@
  * 
  * See https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.Builder.html
  */
-component{
+component accessors="true"{
+
+    /**
+     * The Java Builder we represent
+     */
+    property name="jBuilder";
 
     /**
      * Construct a CFML builder out of the Java Builder

@@ -20,28 +20,28 @@
 			story( "I can initialize a stream with many data types", function(){
 				given( "nothing to the constructor", function(){
 					then( "it should build an empty stream", function(){
-						var stream = new cbstreams.Stream();
+						var stream = new cbstreams.models.Stream();
 						expect( stream.count() ).toBe( 0 );
 					});
 				});
 
 				given( "a list", function(){
 					then( "it should build a list stream", function(){
-						var stream = new cbstreams.Stream( "1,2,3" );
+						var stream = new cbstreams.models.Stream( "1,2,3" );
 						expect( stream.count() ).toBe( 3 );
 					});
 				});
 
 				given( "an array", function(){
 					then( "it should build an array stream", function(){
-						var stream = new cbstreams.Stream( [1,2,3] );
+						var stream = new cbstreams.models.Stream( [1,2,3] );
 						expect( stream.count() ).toBe( 3 );
 					});
 				});
 
 				given( "a struct", function(){
 					then( "it should build a collection stream", function(){
-						var stream = new cbstreams.Stream( {
+						var stream = new cbstreams.models.Stream( {
 							name = "luis majano",
 							age = 40
 						} );
@@ -53,22 +53,26 @@
 			story( "I can generate streams from different providers", function(){
 				given( "a sequential stream using the `of` method", function(){
 					then( "an ordered stream will be created", function(){
-						var stream = new cbstreams.Stream().of( "1", "2", "3" );
+						var stream = new cbstreams.models.Stream().of( "1", "2", "3" );
 						expect( stream.count() ).toBe( 3 );
 					} );
 				} );
 
 				given( "a string", function(){
 					then( "it can create a character stream", function(){
-						var stream = new cbstreams.Stream().ofChars( "luis" );
+						var stream = new cbstreams.models.Stream().ofChars( "luis" );
 						expect( stream.count() ).toBe( 4 );
 					} );
 				} );
 
 				given( "a file path", function(){
-					then( "an stream of the file lines will be created", function(){
-						var stream = new cbstreams.Stream().ofFile( expandPath( "/cbstreams/box.json" ) );
-						expect( stream.findFirst() ).toBe( "{" );
+					then( "a stream of the file lines will be created", function(){
+						var stream = new cbstreams.models.Stream().ofFile( expandPath( "/cbstreams/box.json" ) );
+						try{
+							expect( stream.findFirst().get() ).toBe( "{" );
+						} finally{
+							stream.close();
+						}
 					} );
 				} );
 			});
@@ -76,13 +80,13 @@
 			story( "I can generate streams from ranges", function(){
 				given( "An open range of 1-4", function(){
 					then( "a stream of 3 will be created", function(){
-						var stream = new cbstreams.Stream().range( 1, 4 );
+						var stream = new cbstreams.models.Stream().range( 1, 4 );
 						expect( stream.count() ).toBe( 3 );
 					});
 				});
 				given( "A closed range of 1-4", function(){
 					then( "a stream of 4 will be created", function(){
-						var stream = new cbstreams.Stream().rangeClosed( 1, 4 );
+						var stream = new cbstreams.models.Stream().rangeClosed( 1, 4 );
 						expect( stream.count() ).toBe( 4 );
 					});
 				});
@@ -91,7 +95,7 @@
 			story( "I can limit streams", function(){
 				given( "a discrete stream", function(){
 					then( "it can be limited", function(){
-						var stream = new cbstreams.Stream( "1,2,3,4" ).limit( 1 );
+						var stream = new cbstreams.models.Stream( "1,2,3,4" ).limit( 1 );
 						expect( stream.count() ).toBe( 1 );
 					} );
 				} );
@@ -100,7 +104,7 @@
 			story( "I can distinct streams", function(){
 				given( "a repetitive stream", function(){
 					then( "it can be returned in a distinct manner", function(){
-						var stream = new cbstreams.Stream( "1,1,1" ).distinct();
+						var stream = new cbstreams.models.Stream( "1,1,1" ).distinct();
 						expect( stream.count() ).toBe( 1 );
 					} );
 				} );
@@ -109,11 +113,11 @@
 			story( "I want to build native cf structs from collection entry sets", function(){
 				given( "a struct as input to a stream", function(){
 					then( "I can get a key/value representation", function(){
-						var stream = new cbstreams.Stream( {
+						var stream = new cbstreams.models.Stream( {
 							name = "luis majano",
 							age = 40
 						} );
-						var r = stream.findFirst();
+						var r = stream.findFirst().get();
 						expect( r ).toBeStruct();
 					} );
 				} );
@@ -122,7 +126,7 @@
 			story( "I can skip stream elements", function(){
 				given( "a stream with a skip() call", function(){
 					then( "it will return only the non-skipped elements", function(){
-						var stream = new cbstreams.Stream( "1,2,3" ).skip( 1 );
+						var stream = new cbstreams.models.Stream( "1,2,3" ).skip( 1 );
 						expect( stream.count() ).toBe( 2 );
 					} );
 				} );
@@ -131,7 +135,7 @@
 			story( "I can leverage map functions", function(){
 				given( "a stream with a map() call", function(){
 					then( "it will transform the elements", function(){
-						var aStream = new cbstreams.Stream( "abc1,abc2,abc3" )
+						var aStream = new cbstreams.models.Stream( "abc1,abc2,abc3" )
 							.map( function( element ){
 								return element.substring( 0, 3 );
 							})
@@ -145,7 +149,7 @@
 			story( "I can leverage filter functions", function(){
 				given( "a stream with a filter() call", function(){
 					then( "it will filter the elements", function(){
-						var aStream = new cbstreams.Stream( "abc1,abc2,abc3" )
+						var aStream = new cbstreams.models.Stream( "abc1,abc2,abc3" )
 							.filter( function( element ){
 								return findNoCase( "abc1", element );
 							})
@@ -158,10 +162,11 @@
 			story( "I can leverage reduce functions", function(){
 				given( "a stream with a reduce() call with an accumulator only", function(){
 					then( "it will reduce the elements", function(){
-						var reduced = new cbstreams.Stream( "1,2,3" )
+						var reduced = new cbstreams.models.Stream( "1,2,3" )
 							.reduce( function( a, b ){
 								return a + b;
-							});
+							})
+							.get();
 						//debug( reduced );
 						// 1+2+3 = 6
 						expect( reduced ).toBe( 6 );
@@ -170,7 +175,7 @@
 
 				given( "a stream with a reduce() call with an accumulator and a seed", function(){
 					then( "it will reduce the elements with the seed", function(){
-						var reduced = new cbstreams.Stream( "1,2,3" )
+						var reduced = new cbstreams.models.Stream( "1,2,3" )
 							.reduce( function( a, b ){
 								return a + b;
 							}, 10 );
@@ -184,7 +189,7 @@
 			story( "I can create an empty stream", function(){
 				given( "A call to empty()", function(){
 					then( "it will create an empty sequential stream", function(){
-						var stream = new cbstreams.Stream().empty();
+						var stream = new cbstreams.models.Stream().empty();
 						expect( stream.count() ).toBe( 0 );
 					} );
 				} );
@@ -193,7 +198,7 @@
 			story( "I can create a stream a leverage the forEach functions", function(){
 				given( "A basic stream with a forEach", function(){
 					then( "I can output it to the debug console", function(){
-						var stream = new cbStreams.Stream( "luis,alexia,lucas" );
+						var stream = new cbStreams.models.Stream( "luis,alexia,lucas" );
 						var output = [];
 						stream.forEach( function( element ){
 							output.append( element );
@@ -203,7 +208,7 @@
 				} );
 				given( "An ordered stream with a forEachOrdered", function(){
 					then( "I can output it to the debug console", function(){
-						var stream = new cbStreams.Stream( "luis,alexia,lucas" );
+						var stream = new cbStreams.models.Stream( "luis,alexia,lucas" );
 						var output = [];
 						stream.forEachOrdered( function( element ){
 							output.append( element );
@@ -216,7 +221,7 @@
 			story( "I can find a match in a stream with short-cicuiting activities", function(){
 				given( "A call to anyMatch() with a match", function(){
 					then( "will produce true", function(){
-						var results = new cbstreams.Stream( "1,2,3" )
+						var results = new cbstreams.models.Stream( "1,2,3" )
 							.anyMatch( function( count ){
 								return count gt 1;
 							} );
@@ -225,7 +230,7 @@
 				} );
 				given( "A call to anyMatch() without a match", function(){
 					then( "will not produce", function(){
-						var results = new cbstreams.Stream( "1,2,3" )
+						var results = new cbstreams.models.Stream( "1,2,3" )
 							.anyMatch( function( count ){
 								return count gt 10;
 							} );
@@ -237,7 +242,7 @@
 			story( "I can find all matches in a stream with short-cicuiting activities", function(){
 				given( "A call to allMatch() with a match", function(){
 					then( "will produce true", function(){
-						var results = new cbstreams.Stream( "1,2,3" )
+						var results = new cbstreams.models.Stream( "1,2,3" )
 							.allMatch( function( count ){
 								return count lt 4;
 							} );
@@ -246,7 +251,7 @@
 				} );
 				given( "A call to allMatch() without a match", function(){
 					then( "will not produce", function(){
-						var results = new cbstreams.Stream( "1,2,3" )
+						var results = new cbstreams.models.Stream( "1,2,3" )
 							.allMatch( function( count ){
 								return count gt 10;
 							} );
@@ -258,7 +263,7 @@
 			story( "I can peek into the stream as it progresses", function(){
 				given( "A stream with peek() operations", function(){
 					then( "then I can peek into it.", function(){
-						var results = new cbstreams.Stream( "one,two,three,four" )
+						var results = new cbstreams.models.Stream( "one,two,three,four" )
 							.filter( function( e ){
 								return e.len() > 3;
 							} )
@@ -279,26 +284,26 @@
 
 			story( "I can do numerical operations on streams", function(){
 				beforeEach( function(){
-					numberStream = new cbstreams.Stream( 
+					numberStream = new cbstreams.models.Stream( 
 						collection="1,2,3,4,5,6", 
 						isNumeric=true
 					);
 				} );
 				given( "A call to max()", function(){
 					then( "it will produce the maximum number in the stream", function(){
-						var max = numberStream.max();
+						var max = numberStream.max().get();
 						expect( max ).toBe( 6 );
 					} );
 				} );
 				given( "A call to min()", function(){
 					then( "it will produce the minimum number in the stream", function(){
-						var min = numberStream.min();
+						var min = numberStream.min().get();
 						expect( min ).toBe( 1 );
 					} );
 				} );
 				given( "A call to average()", function(){
 					then( "it will produce the average number in the stream", function(){
-						var average = numberStream.average();
+						var average = numberStream.average().get();
 						expect( average ).toBe( 3.5 );
 					} );
 				} );
@@ -323,7 +328,7 @@
 
 				given( "The groupingBy collection", function(){
 					then( "it will produce a grouped result", function(){
-						var aPeople = new cbStreams.Stream( people )
+						var aPeople = new cbStreams.models.Stream( people )
 							.collectGroupingBy( function( item ){
 								return item.price;
 							} );
@@ -335,7 +340,7 @@
 
 				given( "The summing collection", function(){
 					then( "it will produce a summed result", function(){
-						var aSum = new cbStreams.Stream( people )
+						var aSum = new cbStreams.models.Stream( people )
 							.collectSum( function( item ){
 								return item.price;
 							} );
@@ -345,7 +350,7 @@
 
 				given( "The average collection", function(){
 					then( "it will produce an average result", function(){
-						var aAverage = new cbStreams.Stream( people )
+						var aAverage = new cbStreams.models.Stream( people )
 							.collectAverage( function( item ){
 								return item.price;
 							} );
@@ -356,7 +361,7 @@
 
 				given( "The summary collection", function(){
 					then( "it will produce a summary report result", function(){
-						var aSummary = new cbStreams.Stream( people )
+						var aSummary = new cbStreams.models.Stream( people )
 							.collectSummary( function( item ){
 								return item.price;
 							} );
@@ -371,7 +376,7 @@
 
 				given( "The default array collector", function(){
 					then( "it will produce an array collection", function(){
-						var aNames = new cbStreams.Stream( people )
+						var aNames = new cbStreams.models.Stream( people )
 							.map( function( element ){
 								return element.name;
 							} )
@@ -384,7 +389,7 @@
 
 				given( "The list collector", function(){
 					then( "it will produce a string list of the collection", function(){
-						var aNames = new cbStreams.Stream( people )
+						var aNames = new cbStreams.models.Stream( people )
 							.map( function( element ){
 								return element.name;
 							} )
@@ -399,7 +404,7 @@
 				given( "The struct collector and a key and id mapper", function(){
 					then( "it will produce a struct of the collection of those mappers", function(){
 						
-						var results = new cbStreams.Stream( people )
+						var results = new cbStreams.models.Stream( people )
 							.collectAsStruct( "id", "name" );
 						expect( results )
 							.toBeStruct();

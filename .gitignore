@@ -3,11 +3,11 @@
 .artifacts/**
 .tmp/**
 
-.engine/**
-coldbox/**
-docbox/**
-testbox/**
-logs/**
+test-harness/.engine/**
+test-harness/coldbox/**
+test-harness/docbox/**
+test-harness/testbox/**
+test-harness/logs/**
 
 # log files
 logs/**

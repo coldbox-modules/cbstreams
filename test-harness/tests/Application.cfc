@@ -19,6 +19,13 @@ component{
 	// The application root
 	rootPath = REReplaceNoCase( this.mappings[ "/tests" ], "tests(\\|/)", "" );
 	this.mappings[ "/root" ]   = rootPath;
-	this.mappings[ "/cbstreams" ]   = rootPath;
+
+	// UPDATE THE NAME OF THE MODULE IN TESTING BELOW
+	request.MODULE_NAME = "cbstreams";
+
+	// The module root path
+	moduleRootPath = REReplaceNoCase( this.mappings[ "/root" ], "#request.module_name#(\\|/)test-harness(\\|/)", "" );
+	this.mappings[ "/moduleroot" ] = moduleRootPath;
+	this.mappings[ "/#request.MODULE_NAME#" ] = moduleRootPath & "#request.MODULE_NAME#";
 
 }

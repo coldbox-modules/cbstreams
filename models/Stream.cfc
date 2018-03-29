@@ -1,3 +1,6 @@
+/**
+ * This is a transient class that models a Java Stream: https://docs.oracle.com/javase/8/docs/api/?java/util/stream/Stream.html
+ */
 component accessors="true"{
 
 	/**
@@ -471,26 +474,27 @@ component accessors="true"{
 	}
 
 	/**
+	 * Returns an Optional describing some element of the stream, or an empty Optional if the stream is empty. 
+	 * 
 	 * This is a short-circuiting terminal operation. 
+	 * 
 	 * The behavior of this operation is explicitly nondeterministic; it is free to select any element in the stream. This is to allow for maximal performance in parallel operations; the cost is that multiple invocations on the same source may not return the same result. (If a stable result is desired, use findFirst() instead.)
 	 * 
-	 * @defaultValue Return this value if the return is null
+	 * @return an Optional describing some element of this stream, or an empty Optional if the stream is empty
 	 */
-	function findAny( defaultValue ){
-		var optional = variables.jStream.findAny();
-		return getNativeTypeFromOptional( optional ) ?: defaultValue ?: javaCast( "null", "" );
+	Optional function findAny(){
+		return new Optional( variables.jStream.findAny() );
 	}
 
 	/**
-	 * This is a short-circuiting terminal operation.
-	 * 
 	 * Returns an Optional describing the first element of this stream, or an empty Optional if the stream is empty. If the stream has no encounter order, then any element may be returned. 
 	 * 
-	 * @defaultValue Return this value if the return is null
+	 * This is a short-circuiting terminal operation.
+	 * 
+	 * @return an Optional describing the first element of this stream, or an empty Optional if the stream is empty. If the stream has no encounter order, then any element may be returned. 
 	 */
-	function findFirst( defaultValue ){
-		var optional = variables.jStream.findFirst();
-		return getNativeTypeFromOptional( optional ) ?: defaultValue ?: javaCast( "null", "" );
+	Optional function findFirst(){
+		return new Optional( variables.jStream.findFirst() );
 	}
 
 	/**
@@ -532,17 +536,16 @@ component accessors="true"{
 	/**
 	 * Performs a reduction on the elements of this stream.
 	 * 
-	 * This function can run the reduction in 3 modes:
-	 * 1 - Accumulation only: Using the accumulation function, and returns the reduced value, if any.
-	 * 2 - Accumulation with identity value: Performs a reduction on the elements of this stream, using the provided identity or starting value and an associative accumulation function, and returns the reduced value
+	 * This function can run the reduction in 2 modes:
+	 * 1 - Accumulation only: Using the accumulation function, and returns the reduced value, if any inside an Optional
+	 * 2 - Accumulation with identity value: Performs a reduction on the elements of this stream, using the provided identity or starting value and an associative accumulation function, and returns the reduced value. NOT AN OPTIONAL
 	 * 
 	 * This is a terminal operation.
 	 * 
 	 * @accumulator an associative, non-interfering, stateless function for combining two values
 	 * @identity the identity value for the accumulating function. If not used, then the accumulator is used in isolation
-	 * @defaultValue The default value to return if the reduce() operations prodces a null value
 	 */
-	function reduce( required accumulator, identity, defaultValue ){
+	function reduce( required accumulator, identity ){
 		var proxy = createDynamicProxy( 
 			new proxies.BinaryOperator( arguments.accumulator ), 
 			[ "java.util.function.BinaryOperator" ] 
@@ -550,15 +553,13 @@ component accessors="true"{
 
 		// Accumulator Only
 		if( isNull( arguments.identity ) ){
-			var optional = variables.jStream.reduce( proxy );
-			return getNativeTypeFromOptional( optional ) ?: defaultValue ?: javaCast( "null", "" );
+			return new Optional( variables.jStream.reduce( proxy ) );
 		} 
 		// Accumulator + Identity Seed
 		else {
 			var results = variables.jStream.reduce( arguments.identity, proxy );
-			return getNativeType( results ) ?: defaultValue ?: javaCast( "null", "" );
+			return new Optional().getNativeType( results );
 		}
-		
 	}
 
 	/**
@@ -617,32 +618,58 @@ component accessors="true"{
 
 	/**
 	 * Returns an numeric describing the maximum element of this stream, or a null if this stream is empty.
-	 * This can only be done with int, long, or double typed streams
+	 * This can only be done with int, long, or double typed streams unless you pass in a 
+	 * Comparator function or lambda: (a,b) => return 0, +- value
 	 * 
 	 * This is a terminal operation.
+	 * 	 * 
+	 * obj1 and obj2 are the objects to be compared. This method returns zero if the objects are equal. It returns a positive value if obj1 is greater than obj2. Otherwise, a negative value is returned.
+	 * 
+	 * @comparator A comparator function or lambda
 	 */
-	numeric function max(){
-		return getValueFromTypedOptional( variables.jStream.max() );
+	Optional function max( comparator ){
+		if( isNull( arguments.comparator ) ){
+			return new Optional( variables.jStream.max() );
+		} else {
+			var oProxy = createDynamicProxy(
+				new proxies.Comparator( arguments.comparator ),
+				[ "java.util.Comparator" ]
+			);
+			return new Optional( variables.jStream.max( oProxy ) );
+		}
 	}
 
 	/**
 	 * Returns an numeric describing the minimum element of this stream, or a null if this stream is empty.
-	 * This can only be done with int, long, or double typed streams
+	 * This can only be done with int, long, or double typed streams unless you pass in a 
+	 * Comparator function or lambda: (a,b) => return 0, +- value
 	 * 
 	 * This is a terminal operation.
+	 * 
+	 * obj1 and obj2 are the objects to be compared. This method returns zero if the objects are equal. It returns a positive value if obj1 is greater than obj2. Otherwise, a negative value is returned.
+	 * 
+	 * @comparator A comparator function or lambda
 	 */
-	numeric function min(){
-		return getValueFromTypedOptional( variables.jStream.min() );
+	Optional function min( comparator ){
+		if( isNull( arguments.comparator ) ){
+			return new Optional( variables.jStream.min() );
+		} else {
+			var oProxy = createDynamicProxy(
+				new proxies.Comparator( arguments.comparator ),
+				[ "java.util.Comparator" ]
+			);
+			return new Optional( variables.jStream.min( oProxy ) );
+		}
 	}
 
 	/**
-	 * Returns an numeric describing the average of the elements of this stream, or a null if this stream is empty.
+	 * Returns an Optional describing the average of the elements of this stream, or a null if this stream is empty.
 	 * This can only be done with int, long, or double typed streams
 	 * 
 	 * This is a terminal operation.
 	 */
-	numeric function average(){
-		return getValueFromTypedOptional( variables.jStream.average() );
+	Optional function average(){
+		return new Optional( variables.jStream.average() );
 	}
 
 	/**
@@ -856,43 +883,6 @@ component accessors="true"{
 
 	/************************************ PRIVATE ************************************/
 
-
-	/**
-	 * This method is in charge of detecting Java native types and converting them to CF Types from
-	 * Java Optionals
-	 * 
-	 * @optional The optional Java object https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html
-	 */
-	private function getNativeTypeFromOptional( required optional ){
-		// Only return results if value is present, else produces a null
-		if( optional.isPresent() ){
-			var results 	= optional.get();
-			return getNativeType( results );
-		}
-	}
-
-	/**
-	 * Return a native CF type from incoming Java type
-	 * 
-	 * @results The native Java return
-	 */
-	private function getNativeType( results ){
-		if( isNull( arguments.results ) ){
-			return;
-		}
-
-		var className 	= arguments.results.getClass().getName();
-		var isEntrySet 	= isInstanceOf( arguments.results, "java.util.Map$Entry" ) OR isInstanceOf( arguments.results, "java.util.HashMap$Node" ); 
-
-		if( isEntrySet ){
-			return {
-				"#arguments.results.getKey()#" : arguments.results.getValue()
-			};
-		}
-
-		return arguments.results;
-	}
-
 	/**
 	 * Create a primitive typed proxy function
 	 *
@@ -919,29 +909,6 @@ component accessors="true"{
 					[ "java.util.function.ToLongFunction" ]
 				);
 			}
-		}
-	}
-
-	/**
-	 * Verify if the optional is of a primitive type and call the appropriate function to return it's value, else null if not found.
-	 *
-	 * @optional 
-	 */
-	private function getValueFromTypedOptional( required optional ){
-		if( !optional.isPresent() ){
-			return;
-		}
-
-		if( isInstanceOf( arguments.optional, "java.util.OptionalInt" ) ){
-			return arguments.optional.getAsInt();
-		}
-
-		if( isInstanceOf( arguments.optional, "java.util.OptionalLong" ) ){
-			return arguments.optional.getAsLong();
-		}
-
-		if( isInstanceOf( arguments.optional, "java.util.OptionalDouble" ) ){
-			return arguments.optional.getAsDouble();
 		}
 	}
 
