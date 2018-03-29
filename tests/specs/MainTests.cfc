@@ -255,6 +255,62 @@
 				} );
 			} );
 
+			story( "I can peek into the stream as it progresses", function(){
+				given( "A stream with peek() operations", function(){
+					then( "then I can peek into it.", function(){
+						var results = new cbstreams.Stream( "one,two,three,four" )
+							.filter( function( e ){
+								return e.len() > 3;
+							} )
+							.peek( function( e ){
+								debug( "Filtered Value " & e );
+							} )
+							.map( function( e ){
+								return ucase( e );
+							} )
+							.peek( function( e ){
+								debug( "Mapped Value " & e );
+							} )
+							.collect();
+						expect( results ).toHaveLength( 2 );
+					} );
+				} );
+			} );
+
+			story( "I can do numerical operations on streams", function(){
+				beforeEach( function(){
+					numberStream = new cbstreams.Stream( 
+						collection="1,2,3,4,5,6", 
+						isNumeric=true
+					);
+				} );
+				given( "A call to max()", function(){
+					then( "it will produce the maximum number in the stream", function(){
+						var max = numberStream.max();
+						expect( max ).toBe( 6 );
+					} );
+				} );
+				given( "A call to min()", function(){
+					then( "it will produce the minimum number in the stream", function(){
+						var min = numberStream.min();
+						expect( min ).toBe( 1 );
+					} );
+				} );
+				given( "A call to average()", function(){
+					then( "it will produce the average number in the stream", function(){
+						var average = numberStream.average();
+						expect( average ).toBe( 3.5 );
+					} );
+				} );
+
+				given( "A call to summaryStatistics()", function(){
+					then( "it will produce stats about the stream", function(){
+						var stats = numberStream.summaryStatistics();
+						expect( stats ).toBeStruct();
+					} );
+				} );
+			} );
+
 			story( "I can collect streams into different types", function(){
 
 				beforeEach( function(){
@@ -274,6 +330,42 @@
 						
 						expect( aPeople[ 25 ] ).toHaveLength( 1 );
 						expect( aPeople[ 30 ] ).toHaveLength( 2 );
+					} );
+				} );
+
+				given( "The summing collection", function(){
+					then( "it will produce a summed result", function(){
+						var aSum = new cbStreams.Stream( people )
+							.collectSum( function( item ){
+								return item.price;
+							} );
+						expect( aSum ).toBe( 85 );
+					} );
+				} );
+
+				given( "The average collection", function(){
+					then( "it will produce an average result", function(){
+						var aAverage = new cbStreams.Stream( people )
+							.collectAverage( function( item ){
+								return item.price;
+							} );
+						
+						expect(	aAverage ).toBeGT( 28 );
+					} );
+				} );
+
+				given( "The summary collection", function(){
+					then( "it will produce a summary report result", function(){
+						var aSummary = new cbStreams.Stream( people )
+							.collectSummary( function( item ){
+								return item.price;
+							} );
+						expect(	aSummary ).toBeStruct()
+							.toHaveKey( "average" )
+							.toHaveKey( "count" )
+							.toHaveKey( "max" )
+							.toHaveKey( "min" )
+							.toHaveKey( "sum" );
 					} );
 				} );
 

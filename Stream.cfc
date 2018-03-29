@@ -14,11 +14,30 @@ component accessors="true"{
 	variables.isLucee = server.keyExists( "lucee" );
 
 	/**
-	 * Construct a stream
+	 * Construct a stream from an incoming collection.  The supported types are:
+	 * structs, arrays, lists, and strings.  You can also strong type the stream according to the <source>predicate</source> argument.
+	 * This is useful when doing mathematical operations on the stream.
 	 *
 	 * @collection This is an optional collection to build a stream on: List, Array, Struct, Query
+	 * @isNumeric This is a shorthand for doing a numeric typed array of values. This will choose a long stream for you by default.
+	 * @predicate If you will be doing operations on the stream, you can mark it with a predicate type of: int, long or double. Else we will use generic object streams
 	 */
-	Stream function init( any collection="" ){
+	Stream function init( any collection="", isNumeric=false, predicate="" ){
+		// Determine carray ast type for incoming collection, default is any object.
+		var castType = "java.lang.Object[]";
+
+		// Verify numeric shortcut
+		if( arguments.isNumeric ){
+			arguments.predicate = "long";
+		}
+
+		// Determine predicate type
+		switch( arguments.predicate ){
+			case "int"    : { castType = "int[]"; break; }
+			case "long"   : { castType = "long[]"; break; }
+			case "double" : { castType = "double[]"; break; }
+		}
+
 		// If a list, enhance to array
 		if( isSimpleValue( arguments.collection ) ){
 			arguments.collection = listToArray( arguments.collection );
@@ -27,7 +46,7 @@ component accessors="true"{
 		// If Array
 		if( isArray( arguments.collection ) ){
 			variables.jStream = variables.Arrays.stream( 
-				javaCast( "java.lang.Object[]", arguments.collection ) 
+				javaCast( castType, arguments.collection ) 
 			);
 			return this;
 		}
@@ -292,7 +311,140 @@ component accessors="true"{
 		return this;
 	}
 	
+	/**
+	 * Returns an equivalent stream that is sequential. May return itself, either because the stream was already sequential, or because the underlying stream state was modified to be sequential. 
+	 * 
+	 * This is an intermediate operation.
+	 */
+	Stream function sequential(){
+		variables.jStream = variables.jStream.sequential();
+		return this;
+	}
+
+	/**
+	 * Returns an equivalent stream that is parallel. May return itself, either because the stream was already parallel, or because the underlying stream state was modified to be parallel. 
+	 * 
+	 * This is an intermediate operation.
+	 */
+	Stream function parallel(){
+		variables.jStream = variables.jStream.parallel();
+		return this;
+	}
+
+	/**
+	 * Returns an equivalent stream that is unordered. May return itself, either because the stream was already unordered, or because the underlying stream state was modified to be unordered. 
+	 * 
+	 * This is an intermediate operation.
+	 */
+	Stream function unordered(){
+		variables.jStream = variables.jStream.unordered();
+		return this;
+	}
+
+	/**
+	 * Returns an equivalent stream with an additional close handler. 
+	 * Close handlers are run when the close() method is called on the stream, and are executed in the order they were added.
+	 *  All close handlers are run, even if earlier close handlers throw exceptions. If any close handler throws an exception, 
+	 * the first exception thrown will be relayed to the caller of close(), with any remaining exceptions added to that 
+	 * exception as suppressed exceptions (unless one of the remaining exceptions is the same exception as the first exception, 
+	 * since an exception cannot suppress itself.) May return itself. 
+	 * 
+	 * @closeHandler A lambda,closure or a CFC that implements a <code>run()</code> method. to be executed when the stream is closed.
+	 */
+	Stream function onClose( required closeHandler ){
+		variables.jStream = variables.jStream.onClose(
+			createDynamicProxy(
+				new proxies.Runnable( arguments.closeHandler ),
+				[ "java.lang.Runnable" ]
+			)
+		);
+		return this;
+	}
+
+	/**
+	 * Creates a lazily concatenated stream whose elements are all the elements of the first stream followed by all the elements of 
+	 * the second stream. The resulting stream is ordered if both of the input streams are ordered, and parallel if either of the 
+	 * input streams is parallel. When the resulting stream is closed, the close handlers for both input streams are invoked.
+	 * 
+	 * Use caution when constructing streams from repeated concatenation. Accessing an element of a deeply concatenated stream can result in deep call chains, or even StackOverflowException.
+	 * 
+	 * @a the first stream
+	 * @b the second stream
+	 * 
+	 * @return the concatenation of the two input streams
+	 */
+	Stream function concat( required a, required b ){
+		variables.jStream = variables.jStream.concat( arguments.a, arguments.b );
+		return this;
+	}
+
+	/**
+	 * Returns a stream consisting of the elements of this stream, additionally performing the provided action on each element as elements are consumed from the resulting stream. 
+	 * 
+	 * This is an intermediate operation. 
+	 * 
+	 * For parallel stream pipelines, the action may be called at whatever time and in whatever thread the element is made available by the upstream operation. If the action modifies shared state, it is responsible for providing the required synchronization.
+	 * 
+	 * This method exists mainly to support debugging, where you want to see the elements as they flow past a certain point in a pipeline: 
+	 * 
+	 * <pre>
+	 * Stream.of("one", "two", "three", "four")
+     *    .filter( (e) +> e.len() > 3 )
+     *    .peek( (e) => SystemOutput( "Filtered value: " & e, true ) )
+     *    .map( (item) => item.toUpperCase() )
+     *    .peek( (e) => SystemOutput( "Mapped value: " & e, true ) )
+     *    .collect();
+	 *</pre>
+	 * 
+	 * @action a non-interfering action to perform on the elements as they are consumed from the stream lambda or closure
+	 */
+	Stream function peek( required action ){
+		variables.jStream = variables.jStream.peek(
+			createDynamicProxy(
+				new proxies.Consumer( arguments.action ),
+				[ "java.util.function.Consumer" ]
+			)
+		);
+		return this;
+	}
+
 	/**************************************** TERMINATORS ****************************************/
+
+	/**
+	 * Returns an iterator for the elements of this stream. 
+	 * 
+	 * This is an terminal operation.
+	 * 
+	 * @return https://docs.oracle.com/javase/8/docs/api/java/util/Iterator.html
+	 */
+	function iterator(){
+		return variables.jStream.iterator();
+	}
+
+	/**
+	 * Returns a spliterator for the elements of this stream.
+	 * 
+	 * This is a terminal operation.
+	 * 
+	 * @return https://docs.oracle.com/javase/8/docs/api/java/util/Spliterator.html
+	 */
+	function spliterator(){
+		return variables.jStream.spliterator();
+	}
+
+	/**
+	 * Only use this method for closing streams that require IO resources
+	 */
+	void function close(){
+		variables.jStream.close();
+	}
+
+	/**
+	 * Returns whether this stream, if a terminal operation were to be executed, would execute in parallel. Calling this method after invoking an terminal stream operation method may yield unpredictable results.
+	 */
+	boolean function isParallel(){
+		return variables.jStream.isParallel();
+	}
 
 	/**
 	 * Returns an array containing the elements of this stream.
@@ -437,6 +589,67 @@ component accessors="true"{
 	}
 
 	/**
+	 * Returns whether no elements of this stream match the provided predicate. 
+	 * May not evaluate the predicate on all elements if not necessary for determining the result. 
+	 * If the stream is empty then true is returned and the predicate is not evaluated. 
+	 * 
+	 * This is a short-cicuiting terminal operation.
+	 * 
+	 * @predicate a non-interfering, stateless predicate to apply to elements of this stream
+	 */
+	boolean function noneMatch( required predicate ){
+		return variables.jStream.noneMatch(
+			createDynamicProxy( 
+				new proxies.Predicate( arguments.predicate ), 
+				[ "java.util.function.Predicate" ] 
+			)
+		);
+	}
+
+	/**
+	 * Returns an numeric describing the maximum element of this stream, or a null if this stream is empty.
+	 * This can only be done with int, long, or double typed streams
+	 * 
+	 * This is a terminal operation.
+	 */
+	numeric function max(){
+		return getValueFromTypedOptional( variables.jStream.max() );
+	}
+
+	/**
+	 * Returns an numeric describing the minimum element of this stream, or a null if this stream is empty.
+	 * This can only be done with int, long, or double typed streams
+	 * 
+	 * This is a terminal operation.
+	 */
+	numeric function min(){
+		return getValueFromTypedOptional( variables.jStream.min() );
+	}
+
+	/**
+	 * Returns an numeric describing the average of the elements of this stream, or a null if this stream is empty.
+	 * This can only be done with int, long, or double typed streams
+	 * 
+	 * This is a terminal operation.
+	 */
+	numeric function average(){
+		return getValueFromTypedOptional( variables.jStream.average() );
+	}
+
+	/**
+	 * Returns a Summary describing various summary data about the elements in this stream.
+	 * By default we return a struct with the following stats: average, count, max, min, and sum.
+	 * 
+	 * This is a terminal operation.
+	 * 
+	 * @returnNative If true, then we will return the native Java object, else a struct of stats
+	 */
+	struct function summaryStatistics( boolean returnNative=false ){
+		var stats = variables.jStream.summaryStatistics();
+		return ( arguments.returnNative ? stats : getNativeStatsStruct( stats ) );
+	}
+
+	/**
 	 * A mutable reduction operation that accumulates input elements into a mutable result container, optionally transforming the accumulated result into a final representation after all input elements have been processed. 
 	 * By default we will collect to an array.
 	 * 
@@ -469,7 +682,7 @@ component accessors="true"{
 	 * @mapper The mapper lambda or closure to determine averages on
 	 * @primitive The primitive type to cast with, we default to 'long'. Accepted values are int, long, double
 	 */
-	function collectAveraging( required mapper, primitive="long" ){
+	function collectAverage( required mapper, primitive="long" ){
 		var proxy = createPrimitiveProxyFunction( arguments.mapper, arguments.primitive );
 		switch( arguments.primitive ){
 			case "int" : {
@@ -490,7 +703,7 @@ component accessors="true"{
 	 * @mapper The mapper lambda or closure to determine the sum on
 	 * @primitive The primitive type to cast with, we default to 'long'. Accepted values are int, long, double
 	 */
-	function collectSumming( required mapper, primitive="long" ){
+	function collectSum( required mapper, primitive="long" ){
 		var proxy = createPrimitiveProxyFunction( arguments.mapper, arguments.primitive );
 		switch( arguments.primitive ){
 			case "int" : {
@@ -506,24 +719,39 @@ component accessors="true"{
 	}
 
 	/**
-	 * Returns a Collector which applies an producing mapping function to each input element, and returns summary statistics for the resulting values.
+	 * Returns a Collector which applies an producing mapping function to each input element, and 
+	 * returns summary statistics for the resulting values as a struct with the following keys: 
+	 * average, count, max, min, sum.  You can also get the raw stats report by using the <code>returnNative</code> argument.
 	 * 
 	 * @mapper The mapper lambda or closure to determine the statistics on
 	 * @primitive The primitive type to cast with, we default to 'long'. Accepted values are int, long, double
+	 * @returnNative If true, this will return the SummaryStatistics object instead of the struct report.
+	 * 
+	 * @return By default a struct with {average,count,max,min,sum}.
 	 */
-	function collectSummarizing( required mapper, primitive="long" ){
-		var proxy = createPrimitiveProxyFunction( arguments.mapper, arguments.primitive );
+	function collectSummary( required mapper, primitive="long", boolean returnNative=false ){
+		var proxy	= createPrimitiveProxyFunction( arguments.mapper, arguments.primitive );
+		var oSummary = "";
+
 		switch( arguments.primitive ){
 			case "int" : {
-				return variables.jStream.collect( variables.Collectors.summarizingInt( proxy ) );
+				oSummary = variables.jStream.collect( variables.Collectors.summarizingInt( proxy ) );
 			}
 			case "double" :{
-				return variables.jStream.collect( variables.Collectors.summarizingDouble( proxy ) );
+				oSummary = variables.jStream.collect( variables.Collectors.summarizingDouble( proxy ) );
 			}
 			default : {
-				return variables.jStream.collect( variables.Collectors.summarizingLong( proxy ) );
+				oSummary = variables.jStream.collect( variables.Collectors.summarizingLong( proxy ) );
 			}
 		}
+
+		// Native Results
+		if( arguments.returnNative ){
+			return oSummary;
+		}
+
+		// Struct report
+		return getNativeStatsStruct( oSummary );
 	}
 	
 	/**
@@ -683,5 +911,41 @@ component accessors="true"{
 				);
 			}
 		}
+	}
+
+	/**
+	 * Verify if the optional is of a primitive type and call the appropriate function to return it's value, else null if not found.
+	 *
+	 * @optional 
+	 */
+	private function getValueFromTypedOptional( required optional ){
+		if( !optional.isPresent() ){
+			return;
+		}
+
+		if( isInstanceOf( arguments.optional, "java.util.OptionalInt" ) ){
+			return arguments.optional.getAsInt();
+		}
+
+		if( isInstanceOf( arguments.optional, "java.util.OptionalLong" ) ){
+			return arguments.optional.getAsLong();
+		}
+
+		if( isInstanceOf( arguments.optional, "java.util.OptionalDouble" ) ){
+			return arguments.optional.getAsDouble();
+		}
+	}
+
+	/**
+	 * Build a stats structure from a Java SummaryStatistics Object
+	 */
+	private function getNativeStatsStruct( required stats ){
+		return {
+			"average" 	: arguments.stats.getAverage(),
+			"count"		: arguments.stats.getCount(),
+			"max"		: arguments.stats.getMax(),
+			"min"		: arguments.stats.getMin(),
+			"sum" 		: arguments.stats.getSum()
+		};
 	}
 }

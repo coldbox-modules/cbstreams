@@ -8,7 +8,7 @@ This is the implementation roadmap.
 √ anyMatch
 - builder
 √ collect
-- concat
+√ concat
 √ count
 √ distinct
 √ empty
@@ -21,11 +21,9 @@ This is the implementation roadmap.
 √ iterate
 √ limit
 √ map
-- max
-- min
-- noneMatch
+√ noneMatch
 √ of
-- peek
+√ peek
 √ reduce
 √ reduce with seed
 - reduce with accumulator and collection ( needs parallel )
@@ -33,14 +31,21 @@ This is the implementation roadmap.
 √ sorted
 √ sorted with comparator
 √ toArray
-- close
-- isParallel
-- iterator
-- onClose
-- parallel
-- sequential
-- spliterator
-- unordered
+√ close
+√ onClose
+√ isParallel
+√ iterator
+√ parallel
+√ sequential
+√ spliterator
+√ unordered
+
+## Predicate Streams
+
+√ average
+√ summaryStatistics
+√ max
+√ min
 
 ## Collections
 
@@ -49,4 +54,3 @@ This is the implementation roadmap.
 √ summarizingInt()
 √ groupingBy()
 √ partitioningBy()
-
