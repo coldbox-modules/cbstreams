@@ -1,6 +1,8 @@
 component accessors="true"{
 
-	// The Java Stream we represent
+	/**
+	 * The Java Stream we represent
+	 */ 
 	property name="jStream";
 
 	// Static Stream Class Access
@@ -80,6 +82,13 @@ component accessors="true"{
 			type="InvalidColletionType",
 			detail="#getMetadata( arguments.collection ).toString()#" 
 		);
+	}
+
+	/**
+	 * Returns a builder for a Stream. So you can build a stream manually by calling on the builder's <code>add()</code> method.
+	 */
+	Builder function builder(){
+		return new Builder( variables.coreStream.builder() );
 	}
 
 	/**

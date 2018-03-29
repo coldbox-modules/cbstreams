@@ -10,7 +10,7 @@ This is the implementation roadmap for streams:
 
 √ allMatch
 √ anyMatch
-- builder
+√ builder
 √ collect
 √ concat
 √ count
