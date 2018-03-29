@@ -1,10 +1,19 @@
 {
     "name":"CBStreams",
+    "version":"1.0.0",
+    "location": "ortus-solutions/cbstreams",
     "author":"Ortus Solutions, Corp",
-    "homepage":"https://www.ortussolutions.com",
+    "homepage":"https://github.com/ortus-solutions/cbstreams",
+    "documentation":"https://github.com/ortus-solutions/cbstreams",
+    "repository":{
+        "type":"git",
+        "url":"https://github.com/ortus-solutions/cbstreams"
+    },
+    "bugs":"https://github.com/ortus-solutions/cbstreams/issues",
+    "shortDescription":"The CFML implementation of Java Streams",
     "slug":"cbstreams",
     "type":"modules",
-    "keywords":"emoji, emoji, and more emoji",
+    "keywords":"java streams, reactive, streaming",
     "license":[
         {
             "type":"Apache2",
