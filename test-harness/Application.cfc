@@ -40,8 +40,12 @@ component{
 	this.mappings[ "/root" ] = COLDBOX_APP_ROOT_PATH;
 
 	// Map back to its root
-	this.mappings[ "/moduleroot" ] = expandPath( "../../" );
-	this.mappings[ "/#request.MODULE_NAME#" ] = expandPath( "../" );
+	moduleRootPath 	= REReplaceNoCase( this.mappings[ "/root" ], "#request.MODULE_NAME#(\\|/)test-harness(\\|/)", "" );
+	modulePath 		= REReplaceNoCase( this.mappings[ "/root" ], "test-harness(\\|/)", "" );
+
+	// Module Root + Path Mappings
+	this.mappings[ "/moduleroot" ] = moduleRootPath;
+	this.mappings[ "/#request.MODULE_NAME#" ] = modulePath;
 	
 	// application start
 	public boolean function onApplicationStart(){
