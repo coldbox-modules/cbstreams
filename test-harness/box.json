@@ -12,9 +12,9 @@
         "docbox":"^2.2.1+27"
     },
     "installPaths":{
-        "coldbox":"coldbox",
-        "testbox":"testbox",
-        "docbox":"docbox"
+        "coldbox":"coldbox/",
+        "testbox":"testbox/",
+        "docbox":"docbox/"
     },
     "testbox":{
         "runner":"http://localhost:60299/tests/runner.cfm"

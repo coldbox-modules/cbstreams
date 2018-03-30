@@ -2,15 +2,17 @@
 <cfparam name="url.path" 	default="#expandPath( "./#request.MODULE_NAME#-APIDocs" )#">
 <cfscript>
 	docName = "#request.MODULE_NAME#-APIDocs";
-	moduleRoot 	= expandPath( "/moduleroot" );
+	moduleRoot 	= expandPath( "/#request.MODULE_NAME#" );
+
 	docbox 	= new docbox.DocBox( properties = {
 		projectTitle 	= "#request.MODULE_NAME# v#url.version#",
 		outputDir 		= url.path
 	} );
+
 	docbox.generate( 
 		source 		= moduleRoot, 
 		mapping 	= request.MODULE_NAME,
-		excludes 	= "(build|test\-harness)"
+		excludes 	= "(.artifacts|.tmp|build|test\-harness)"
 	);
 </cfscript>
 
