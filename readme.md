@@ -48,6 +48,10 @@ Once you have that set-up, just run `box install cbstreams` in your shell and :b
 
 You're now ready to leverage streams!
 
+## Dr. Venkat Subramaniam - The Real Powerhouse in Java 8
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/HVID35J7h_I" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
 ## In-Depth Tutorial
 
 These tutorials on Java Streams are fantastic. We encourage you to read them to see the power of streams. You can also find the `cbstreams` API Docs to be a great source of information: [http://apidocs.ortussolutions.com/#/coldbox-modules/cbstreams](http://apidocs.ortussolutions.com/#/coldbox-modules/cbstreams)
