@@ -41,7 +41,7 @@ component{
 
 	// Map back to its root
 	this.mappings[ "/moduleroot" ] = expandPath( "../../" );
-	this.mappings[ "/#request.MODULE_NAME#" ] = expandPath( "../../" );
+	this.mappings[ "/#request.MODULE_NAME#" ] = expandPath( "../" );
 	
 	// application start
 	public boolean function onApplicationStart(){
