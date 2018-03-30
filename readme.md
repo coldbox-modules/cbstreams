@@ -2,7 +2,7 @@
 
 Welcome to the wonderful world of Java Streams ported for the CFML world!
 
-> One of the major new features in Java 8 is the introduction of the stream functionality – java.util.stream – which contains classes for processing sequences of elements.
+> The whole idea of streams is to enable functional-style operations on streams of elements. A stream is an abstraction, it’s not a data structure. It’s not a collection where you can store elements. The most important difference between a stream and a structure is that a stream doesn’t hold the data. For example you cannot point to a location in the stream where a certain element exists. You can only specify the functions that operate on that data. A stream is an abstraction of a non-mutable collection of functions applied in some order to the data.
 
 The beauty of streams is that the elements in a stream are processed and passed across the processing pipeline. Unlike traditional CFML functions like `map(), reduce() and filter()` which create completely new collections until all items in the pipeline are processed.  With streams, the elements are streamed across the pipeline to increase efficiency and performance.
 

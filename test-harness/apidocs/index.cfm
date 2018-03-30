@@ -23,5 +23,7 @@
 <cfoutput>
 <h1>Done!</h1>
 <a href="#docName#/index.html">Go to Docs!</a>
+<h2>Paths</h2>
+<strong>#request.module_name#</strong> : #expandPath( "/#request.MODULE_NAME#" )#
 </cfoutput>
 
