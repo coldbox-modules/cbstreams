@@ -25,19 +25,19 @@ component accessors="true"{
 	 *
 	 * @collection This is an optional collection to build a stream on: List, Array, Struct, Query
 	 * @isNumeric This is a shorthand for doing a numeric typed array of values. This will choose a long stream for you by default.
-	 * @predicate If you will be doing operations on the stream, you can mark it with a predicate type of: int, long or double. Else we will use generic object streams
+	 * @primitive If you will be doing operations on the stream, you can mark it with a primitive type of: int, long or double. Else we will use generic object streams
 	 */
-	Stream function init( any collection="", isNumeric=false, predicate="" ){
+	Stream function init( any collection="", isNumeric=false, primitive="" ){
 		// Determine carray ast type for incoming collection, default is any object.
 		var castType = "java.lang.Object[]";
 
 		// Verify numeric shortcut
 		if( arguments.isNumeric ){
-			arguments.predicate = "long";
+			arguments.primitive = "long";
 		}
 
-		// Determine predicate type
-		switch( arguments.predicate ){
+		// Determine primitive type
+		switch( arguments.primitive ){
 			case "int"    : { castType = "int[]"; break; }
 			case "long"   : { castType = "long[]"; break; }
 			case "double" : { castType = "double[]"; break; }
