@@ -50,7 +50,7 @@ script:
   # Startup the app
   - curl http://localhost:60299
   # Debugging of tests
-  - curl http://localhost:60299/tests/runner.cfm -o testresults.json && cat testresults.json
+  - curl http://localhost:60299/tests/runner.cfm?reporter=json -o testresults.json && cat testresults.json
   # move back to build dir to build it
   - cd $TRAVIS_BUILD_DIR
   # Build out the project if tests pass
