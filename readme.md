@@ -8,7 +8,7 @@ The beauty of streams is that the elements in a stream are processed and passed 
 
 You can also leverage streams in parallel for parallel execution and take it further with concurrent programming.
 
-```
+```js
 // Lucee 5 lambdas 
 
 streamBuilder.new( "d2", "a2", "b1", "b3", "c" )
@@ -23,18 +23,20 @@ streamBuilder.new( "d2", "a2", "b1", "b3", "c" )
     .forEach( (s) => {
         writedump( "forEach: " + s );
     } );
-
-// map:     d2
-// filter:  D2
-// map:     a2
-// filter:  A2
-// forEach: A2
-// map:     b1
-// filter:  B1
-// map:     b3
-// filter:  B3
-// map:     c
-// filter:  C
+```
+The output is in this order.  Note how the `map()`, `filter()`, and `forEach()` are running simultaneously!
+```
+map:     d2
+filter:  D2
+map:     a2
+filter:  A2
+forEach: A2
+map:     b1
+filter:  B1
+map:     b3
+filter:  B3
+map:     c
+filter:  C
 
 ```
 
