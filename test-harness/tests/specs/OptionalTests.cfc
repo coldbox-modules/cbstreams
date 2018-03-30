@@ -79,7 +79,7 @@ component extends="testbox.system.BaseSpec"{
             } );
 
             it( "can return toString() representations ", function(){
-                var optional = new cbStreams.models.optional().of( "luis" );
+                var optional = new cbStreams.models.Optional().of( "luis" );
                 expect( optional.toString() ).toInclude( "luis" );
             } );
 
