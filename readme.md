@@ -85,8 +85,8 @@ You can also pass **nothing** and create an empty stream.
 You can generate empty streams by just calling on the `new()` method or using the `empty()` method in the Stream class.
 
 ```
-emptyStream = new();
-emptyStream = new().empty();
+emptyStream = streamBuilder.new();
+emptyStream = streamBuilder.new().empty();
 ```
 
 ### Building Streams
