@@ -32,6 +32,8 @@ before_install:
 install:
   # Install Commandbox
   - sudo apt-get update && sudo apt-get --assume-yes install rsync jq commandbox
+  # Install CFConfig + DotEnv
+  - box install commandbox-cfconfig,commandbox-dotenv
   # If using auto-publish, you will need to provide your API token with this line:
   - box config set endpoints.forgebox.APIToken=$FORGEBOX_API_TOKEN > /dev/null
   # Setup for our tests
