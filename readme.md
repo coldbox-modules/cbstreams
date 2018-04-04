@@ -24,7 +24,9 @@ streamBuilder.new( "d2", "a2", "b1", "b3", "c" )
         writedump( "forEach: " + s );
     } );
 ```
+
 The output is in this order.  Note how the `map()`, `filter()`, and `forEach()` are running simultaneously!
+
 ```
 map:     d2
 filter:  D2
@@ -37,7 +39,6 @@ map:     b3
 filter:  B3
 map:     c
 filter:  C
-
 ```
 
 ## Installation
@@ -84,7 +85,7 @@ You can also pass **nothing** and create an empty stream.
 
 You can generate empty streams by just calling on the `new()` method or using the `empty()` method in the Stream class.
 
-```
+```js
 emptyStream = streamBuilder.new();
 emptyStream = streamBuilder.new().empty();
 ```
@@ -93,7 +94,7 @@ emptyStream = streamBuilder.new().empty();
 
 You can build your own stream with your own data by using our Stream Builder. Just get access to the builder and add your data with the `add()` method.
 
-```
+```js
 builder = streamBuilder.builder();
 myData.each( function( item ){
     builder.add( item );
@@ -107,7 +108,7 @@ Make sure you call the `build()` method on the builder to give you an instance o
 
 You can leverage the `of()` method to pass in arguments to build a stream out of all the arguments passed to it:
 
-```
+```js
 stream = streamBuilder.new().of( "a", "hello", "stream" );
 ```
 
@@ -115,7 +116,7 @@ stream = streamBuilder.new().of( "a", "hello", "stream" );
 
 You can leverage the `ofChars()` method to create a character stream from an existing string.
 
-```
+```js
 stream = streamBuilder.new().ofChars( "Welcome to Streams" );
 ```
 
@@ -125,7 +126,7 @@ This will create a stream of every character in the string sequence.
 
 We have also added an `ofFile()` method to help you create streams from files using the Java non-blocking IO classes.  The stream will represent every line in the file so you can navigate through it.  
 
-```
+```js
 stream = streamBuilder.new().ofFile( absolutePath );
 try{
     work on the stream and close it in the finally block;
@@ -140,7 +141,7 @@ try{
 
 You can also use the `generate(), iterate()` method to generate an infinite stream by leveraging a closure/lambda as your supplier of data. In the itreation approach, we start with a seed that is passed to the supplier method and will dictate the next element in the stream.
 
-```
+```js
 // Generation lambda/closure
 stream = streamBuilder.new().generate( function(){
     return randRange( 1, 100 );
@@ -158,7 +159,7 @@ Please note that you can eat up all the memory in the JVM if you don't limit the
 
 You can also leverage the `range() and rangeClosed()` methods to create ranged element streams.  The `rangeClosed()` will use the end number in the sequence, while `range()` will not.  All sequences are incremented by 1.
 
-```
+```js
 stream = streamBuilder.new().range( 1, 200 );
 
 stream = streamBuilder.new().rangeClosed( 1, 2030 );
@@ -168,15 +169,15 @@ stream = streamBuilder.new().rangeClosed( 1, 2030 );
 
 By default all streams are generated as sequential streams.  You can also mark a stream to leverage parallel programming by calling on the `parallel()` method.  You can also convert it back to sequential by using the `sequential()` method.
 
-```
+```js
 stream = streamBuilder.new().range(1, 200 ).parallel();
 ```
 
-
-
 ## Intermediate Operations
 
-Once you have generated streams you can work on the element of the streams by leveraging intermediate operations, meaning they are not terminal operations where results are expected.  The result of an intermediate operation is **always** a stream, so you can infinitely stream to your :heart:'s content.
+Once you have generated streams you can work on the elements of the stream by leveraging **intermediate operations**, meaning they are not **terminal operations** that will evaluate all intermediate operations and produce results.  What does evaluate mean? Well, ALL intermediate operations are lazy evaluated. Meaning they will never execute until a terminal operation has been assigned to the stream.
+
+The result of an intermediate operation is **always** a stream, so you can infinitely stream to your :heart:'s content.
 
 - `limit( maxSize )` - Limit a stream
 - `distinct()` - Return only distinct elements
@@ -267,7 +268,7 @@ void function(){
 
 ## Optionals
 
-Some of the terminal operations on streams do not return a solid value back to you but rather an `Optional.cfc` which mimics a Java Optional.  This class has some cool methods so you can work with retruned results from streams.
+Some of the terminal operations on streams do not return a value back to you but rather an `Optional.cfc` which mimics a Java Optional.  Optional is a simple container for a value which can be null or non-null.  This class has some cool methods so you can work with the returned results from streams.
 
 - `isPresent()` - Checks if the optional has a value returned from the stream or maybe a null
 - `ifPresent( consumer )` - Pass in a consumer closure/lambda and will call it for you if the optional has a value present
@@ -275,10 +276,122 @@ Some of the terminal operations on streams do not return a solid value back to y
 - `map( mapper )` - If a value is present, apply the mapping function to the value and return another Optional
 - `get()` - Get the value in the optional
 - `orElse( other )` - Get the value and if not present, return the other value.
-- orElseGet( other )` - Get the value and if not present, call the other closure/lambda that must return the value you want instead.
+- `orElseGet( other )` - Get the value and if not present, call the other closure/lambda that must return the value you want instead.
 - `hashCode()` - a unique hash code of the value if present
 - `toString()` - debugging for the optional
 
+
+## Examples Galore
+
+Here are some samples for you to enjoy.
+
+```js
+myArray = [
+    "ddd2",
+    "aaa2",
+    "bbb1",
+    "aaa1",
+    "bbb3",
+    "ccc",
+    "bbb2",
+    "ddd1"
+];
+
+// Filtering
+streamBuilder.new( myArray )
+    .filter( function( item ){
+        return item.startsWith( "a" );
+    } )
+    .forEach( function( item ){
+        writedump( item );
+    } );
+
+// "aaa2", "aaa1"
+
+// Sorted Stream
+streamBuilder.new( myArray )
+    .sorted()
+    .filter( function( item ){
+        return item.startsWith( "a" );
+    } )
+    .forEach( function( item ){
+        writedump( item );
+    } );
+// "aaa1", "aaa2"
+
+// Mapping
+streamBuilder.new( myArray )
+    .map( function( item ){
+        return item.ucase();
+    })
+    .sorted( function( a, b ){
+        return a.compareNoCase( b );
+    }
+    .forEach( function( item ){
+        writedump( item );
+    } );
+
+// "DDD2", "DDD1", "CCC", "BBB3", "BBB2", "AAA2", "AAA1"
+
+// Matching
+anyStartsWithA = 
+    streamBuilder
+        .new( myArray )
+        .anyMatch( function( item ){
+            return item.startsWith( "a" );
+        } );
+writeDump( anyStartsWithA );      // true
+
+allStartsWithA =
+    streamBuilder
+        .new( myArray )
+        .allMatch( function( item ){
+            return item.startsWith( "a" );
+        } );
+writeDump( anyStartsWithA );      // false
+
+noneStartsWithZ =
+    streamBuilder
+        .new( myArray )
+        .noneMatch((s) -> s.startsWith("z"));
+
+noneStartsWithZ =
+    streamBuilder
+        .new( myArray )
+        .noneMatch( function( item ){
+            return item.startsWith( "z" );
+        } );
+writeDump( noneStartsWithZ );      // true
+
+// Counting
+startsWithB =
+    streamBuilder
+        .new( myArray )
+        .filter( function( item ){
+            return item.startsWith( "b" );
+        } )
+        .count();
+writeDump( startsWithB );    // 3
+
+// Reduce
+optional =
+    streamBuilder
+        .new( myArray )
+        .sorted()
+        .reduce( function( s1, s2 ){
+            return s1 & "#" & s2;
+        } );
+writedump( optional.get() );
+// "aaa1#aaa2#bbb1#bbb2#bbb3#ccc#ddd1#ddd2"
+
+// Parallel Sorted Count
+count =
+    streamBuilder
+        .new( myArray )
+        .parallel()
+        .sorted()
+        .count();
+```
 
 ********************************************************************************
 Copyright Since 2005 ColdBox Framework by Luis Majano and Ortus Solutions, Corp
