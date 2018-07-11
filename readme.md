@@ -11,7 +11,7 @@ You can also leverage streams in parallel for parallel execution and take it fur
 ```js
 // Lucee 5 lambdas 
 
-streamBuilder.new( "d2", "a2", "b1", "b3", "c" )
+streamBuilder.new( [ "d2", "a2", "b1", "b3", "c" ] )
     .map( (s) => {
         writedump( "map: " + s );
         return s.ucase();
