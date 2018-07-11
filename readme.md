@@ -13,15 +13,15 @@ You can also leverage streams in parallel for parallel execution and take it fur
 
 streamBuilder.new( [ "d2", "a2", "b1", "b3", "c" ] )
     .map( (s) => {
-        writedump( "map: " + s );
+        writedump( "map: " & s );
         return s.ucase();
     } )
     .filter( (s) => {
-        writedump( "filter: " + s );
+        writedump( "filter: " & s );
         return s.startsWith( "A" );
     } )
     .forEach( (s) => {
-        writedump( "forEach: " + s );
+        writedump( "forEach: " & s );
     } );
 ```
 
