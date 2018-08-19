@@ -14,8 +14,8 @@ component{
         variables.buildDir      = cwd & "/.tmp";
         variables.apiDocsURL    = "http://localhost:60299/apidocs/";
         variables.testRunner    = "http://localhost:60299/tests/runner.cfm";
-        
-        // Source Excludes
+
+        // Source Excludes Not Added to final binary
         variables.excludes      = [
             ".gitignore",
             ".travis.yml",
@@ -37,19 +37,19 @@ component{
         } );
 
         return this;
-    }   
+    }
 
     /**
      * Run the build process: test, build source, docs, checksums
-     * 
+     *
      * @projectName The project name used for resources and slugs
      * @version The version you are building
      * @buldID The build identifier
      * @branch The branch you are building
      */
-    function run( 
-        required projectName, 
-        version="1.0.0", 
+    function run(
+        required projectName,
+        version="1.0.0",
         buildID=createUUID(),
         branch="development"
     ){
@@ -66,7 +66,7 @@ component{
 
         // checksums
         buildChecksums();
-        
+
         // Finalize Message
         print.line()
             .boldMagentaLine( "Build Process is done! Enjoy your build!" )
@@ -81,12 +81,12 @@ component{
         print.blueLine( "Testing the package, please wait..." ).toConsole();
 
         command( 'testbox run' )
-            .params( 
+            .params(
                 runner = variables.testRunner,
                 verbose = true
             )
             .run();
-        
+
         // Check Exit Code?
         if( getExitCode() ){
             return error( "Cannot continue building, tests failed!" );
@@ -95,10 +95,15 @@ component{
 
     /**
      * Build the source
+	 *
+	 * @projectName The project name used for resources and slugs
+     * @version The version you are building
+     * @buldID The build identifier
+     * @branch The branch you are building
      */
     function buildSource(
-        required projectName, 
-        version="1.0.0", 
+        required projectName,
+        version="1.0.0",
         buildID=createUUID(),
         branch="development"
     ){
@@ -125,16 +130,16 @@ component{
         // Updating Placeholders
         print.greenLine( "Updating version identifier to #arguments.version#" ).toConsole();
         command( 'tokenReplace' )
-            .params( 
+            .params(
                 path = "/#variables.projectBuildDir#/**",
                 token = "@build.version@",
                 replacement = arguments.version
             )
             .run();
-        
+
         print.greenLine( "Updating build identifier to #arguments.buildID#" ).toConsole();
         command( 'tokenReplace' )
-            .params( 
+            .params(
                 path = "/#variables.projectBuildDir#/**",
                 token = ( arguments.branch == "master" ? "@build.number@" : "+@build.number@" ),
                 replacement = ( arguments.branch == "master" ? arguments.buildID : "-snapshot" )
@@ -144,7 +149,7 @@ component{
         // zip up source
         var destination = "#variables.exportsDir#/#projectName#-#version#.zip";
         print.greenLine( "Zipping code to #destination#" ).toConsole();
-        cfzip( 
+        cfzip(
             action="zip",
             file="#destination#",
             source="#variables.projectBuildDir#",
@@ -163,7 +168,7 @@ component{
         // Generate Docs
         print.greenLine( "Generating API Docs, please wait..." ).toConsole();
         directoryCreate( arguments.outputDir, true, true );
-        
+
         command( 'docbox generate' )
             .params(
                 "source"               =  "models",
@@ -177,7 +182,7 @@ component{
 
         var destination = "#variables.exportsDir#/#projectName#-docs-#version#.zip";
         print.greenLine( "Zipping apidocs to #destination#" ).toConsole();
-        cfzip( 
+        cfzip(
             action="zip",
             file="#destination#",
             source="#arguments.outputDir#",
@@ -231,7 +236,7 @@ component{
 	 **/
 	private function getExitCode() {
 		return (createObject( 'java', 'java.lang.System' ).getProperty( 'cfml.cli.exitCode' ) ?: 0);
-		
+
 	}
 
 }

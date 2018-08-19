@@ -1,7 +1,7 @@
 {
     "name":"CBStreams",
     "version":"@build.version@+@build.number@",
-    "location":"http://downloads.ortussolutions.com/ortussolutions/coldbox-modules/cbstreams/@build.version@/cbstreams-@build.version@.zip",
+    "location":"https://downloads.ortussolutions.com/ortussolutions/coldbox-modules/cbstreams/@build.version@/cbstreams-@build.version@.zip",
     "author":"Ortus Solutions, Corp",
     "homepage":"https://github.com/ortus-solutions/cbstreams",
     "documentation":"https://github.com/ortus-solutions/cbstreams",
@@ -30,9 +30,9 @@
     },
     "ignore":[
         "**/.*",
-        "tests",
+        "test-harness",
         "*/.md"
     ],
     "scripts":{
-    }    
+    }
 }
