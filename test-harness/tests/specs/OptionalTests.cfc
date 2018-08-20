@@ -14,9 +14,6 @@ component extends="testbox.system.BaseSpec"{
 
 		describe( "CB Optional", function(){
 
-			beforeEach(function( currentSpec ){
-			});
-
 			story( "I can create optionals", function(){
 				given( "nothing to the constructor", function(){
 					then( "it should build an empty optional", function(){
@@ -82,7 +79,7 @@ component extends="testbox.system.BaseSpec"{
             } );
 
             it( "can return toString() representations ", function(){
-                var optional = new cbStreams.models.optional().of( "luis" );
+                var optional = new cbStreams.models.Optional().of( "luis" );
                 expect( optional.toString() ).toInclude( "luis" );
             } );
 

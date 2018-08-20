@@ -11,6 +11,7 @@ component{
      */
     function init( required f ){
         variables.target = arguments.f;
+        variables[ "equals" ] = variables.isEqual;
         return this;
     }
 
@@ -21,20 +22,17 @@ component{
         return variables.target( arguments.o1, arguments.o2 );
     }
 
-    function comparing(keyExtractor){}
     function comparing(keyExtractor, keyComparator){}
     function comparingDouble( keyExtractor){}
     function comparingInt(keyExtractor){}
     function comparingLong(keyExtractor){}
-    function equals(Object obj){}
+    function isEqual(Object obj){}
     function naturalOrder(){}
     function nullsFirst(comparator){}
     function nullsLast(comparator){}
     function reversed(){}
     function reverseOrder(){}
     function thenComparing(other){}
-    function thenComparing(keyExtractor){}
-    function thenComparing(keyExtractor, keyComparator){}
     function thenComparingDouble(keyExtractor){}
     function thenComparingInt(keyExtractor){}
     function thenComparingLong(keyExtractor){}

@@ -5,16 +5,14 @@
     "private":true,
     "description":"",
     "dependencies":{
-        "coldbox":"^4.3.0"
+        "coldbox":"^5.0.0"
     },
     "devDependencies":{
-        "testbox":"^2.6.0",
-        "docbox":"^2.2.1+27"
+        "testbox":"^2.8.0"
     },
     "installPaths":{
-        "coldbox":"coldbox",
-        "testbox":"testbox",
-        "docbox":"docbox"
+        "coldbox":"coldbox/",
+        "testbox":"testbox/"
     },
     "testbox":{
         "runner":"http://localhost:60299/tests/runner.cfm"

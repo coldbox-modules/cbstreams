@@ -1,5 +1,12 @@
+/**
+ * Build process for ColdBox Modules
+ * Adapt to your needs.
+ */
 component{
 
+    /**
+     * Constructor
+     */
     function init(){
         // Setup Pathing
         variables.cwd           = getCWD().reReplace( "\.$", "" );
@@ -7,7 +14,8 @@ component{
         variables.buildDir      = cwd & "/.tmp";
         variables.apiDocsURL    = "http://localhost:60299/apidocs/";
         variables.testRunner    = "http://localhost:60299/tests/runner.cfm";
-        // Source Excludes
+
+        // Source Excludes Not Added to final binary
         variables.excludes      = [
             ".gitignore",
             ".travis.yml",
@@ -32,34 +40,74 @@ component{
     }
 
     /**
-     * Run the build process
-     * 
+     * Run the build process: test, build source, docs, checksums
+     *
      * @projectName The project name used for resources and slugs
      * @version The version you are building
      * @buldID The build identifier
      * @branch The branch you are building
      */
-    function run( 
-        required projectName, 
-        version="1.0.0", 
+    function run(
+        required projectName,
+        version="1.0.0",
         buildID=createUUID(),
         branch="development"
     ){
 
+        // Run the tests
+        runTests();
+
+        // Build the source
+        buildSource( argumentCollection=arguments );
+
+        // Build Docs
+        arguments.outputDir = variables.buildDir & "/apidocs";
+        docs( argumentCollection=arguments );
+
+        // checksums
+        buildChecksums();
+
+        // Finalize Message
+        print.line()
+            .boldMagentaLine( "Build Process is done! Enjoy your build!" )
+            .toConsole();
+    }
+
+     /**
+     * Run the test suites
+     */
+    function runTests(){
         // Tests First, if they fail then exit
         print.blueLine( "Testing the package, please wait..." ).toConsole();
+
         command( 'testbox run' )
-            .params( 
+            .params(
                 runner = variables.testRunner,
                 verbose = true
             )
             .run();
+
         // Check Exit Code?
         if( getExitCode() ){
             return error( "Cannot continue building, tests failed!" );
         }
+    }
 
-        // Build Notice
+    /**
+     * Build the source
+	 *
+	 * @projectName The project name used for resources and slugs
+     * @version The version you are building
+     * @buldID The build identifier
+     * @branch The branch you are building
+     */
+    function buildSource(
+        required projectName,
+        version="1.0.0",
+        buildID=createUUID(),
+        branch="development"
+    ){
+        // Build Notice ID
         print.line()
             .boldMagentaLine( "Building #arguments.projectName# v#arguments.version#+#arguments.buildID# from #cwd# using the #arguments.branch# branch." )
             .toConsole();
@@ -82,59 +130,73 @@ component{
         // Updating Placeholders
         print.greenLine( "Updating version identifier to #arguments.version#" ).toConsole();
         command( 'tokenReplace' )
-            .params( 
+            .params(
                 path = "/#variables.projectBuildDir#/**",
                 token = "@build.version@",
                 replacement = arguments.version
             )
             .run();
-        
+
         print.greenLine( "Updating build identifier to #arguments.buildID#" ).toConsole();
         command( 'tokenReplace' )
-            .params( 
+            .params(
                 path = "/#variables.projectBuildDir#/**",
                 token = ( arguments.branch == "master" ? "@build.number@" : "+@build.number@" ),
                 replacement = ( arguments.branch == "master" ? arguments.buildID : "-snapshot" )
             )
             .run();
 
-        // Generate Docs
-        print.greenLine( "Generating API Docs, please wait..." ).toConsole();
-        directoryCreate( variables.buildDir & "/apidocs", true, true );
-        cfhttp( 
-            url="#variables.apiDocsURL#index.cfm?version=#arguments.version#&path=#URLEncodedFormat( variables.buildDir & "/apidocs" )#",
-            result="local.docsOutput" 
-        );
-        
-        if( local.docsOutput.keyExists( "error_detail" ) ){
-            return error( "Error producing Docs: #local.docsOutput.toString()#" );
-        }
-        print.greenLine( "API Docs produced at #variables.buildDir & '/apidocs'#" )
-            .cyanLine( "#local.docsOutput.fileContent#" )
-            .line()
-            .toConsole();
-        
-        // zip it up
+        // zip up source
         var destination = "#variables.exportsDir#/#projectName#-#version#.zip";
         print.greenLine( "Zipping code to #destination#" ).toConsole();
-        cfzip( 
+        cfzip(
             action="zip",
             file="#destination#",
             source="#variables.projectBuildDir#",
             overwrite=true,
             recurse=true
         );
+
+        // Copy box.json for convenience
+        fileCopy( "#variables.projectBuildDir#/box.json", variables.exportsDir );
+    }
+
+    /**
+     * Produce the API Docs
+     */
+    function docs( required projectName, version="1.0.0", outputDir=".tmp/apidocs" ){
+        // Generate Docs
+        print.greenLine( "Generating API Docs, please wait..." ).toConsole();
+        directoryCreate( arguments.outputDir, true, true );
+
+        command( 'docbox generate' )
+            .params(
+                "source"               =  "models",
+                "mapping"              =  "models",
+                "strategy-projectTitle" = "#arguments.projectName# v#arguments.version#",
+                "strategy-outputDir"   = arguments.outputDir
+            )
+            .run();
+
+        print.greenLine( "API Docs produced at #arguments.outputDir#" ).toConsole();
+
         var destination = "#variables.exportsDir#/#projectName#-docs-#version#.zip";
         print.greenLine( "Zipping apidocs to #destination#" ).toConsole();
-        cfzip( 
+        cfzip(
             action="zip",
             file="#destination#",
-            source="#variables.buildDir#/apidocs",
+            source="#arguments.outputDir#",
             overwrite=true,
             recurse=true
         );
+    }
 
-        // checksums
+    /********************************************* PRIVATE HELPERS *********************************************/
+
+    /**
+     * Build Checksums
+     */
+    private function buildChecksums(){
         print.greenLine( "Building checksums" ).toConsole();
         command( 'checksum' )
             .params( path = '#variables.exportsDir#/*.zip', algorithm = 'SHA-512', extension="sha512", write=true )
@@ -142,13 +204,6 @@ component{
         command( 'checksum' )
             .params( path = '#variables.exportsDir#/*.zip', algorithm = 'md5', extension="md5", write=true )
             .run();
-        
-        // Copy box.json for convenience
-        fileCopy( "#variables.projectBuildDir#/box.json", variables.exportsDir );
-
-        print.line()
-            .boldMagentaLine( "Build Process is done! Enjoy your build!" )
-            .toConsole();
     }
 
     /**
@@ -176,13 +231,12 @@ component{
         } );
     }
 
-
     /**
 	 * Gets the last Exit code to be used
 	 **/
-	function getExitCode() {
+	private function getExitCode() {
 		return (createObject( 'java', 'java.lang.System' ).getProperty( 'cfml.cli.exitCode' ) ?: 0);
-		
+
 	}
 
 }
