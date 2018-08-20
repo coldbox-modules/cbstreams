@@ -99,5 +99,6 @@ deploy:
 after_deploy:
   # Move to build out artifact
   - cd ${TRAVIS_BUILD_DIR}/.tmp/${MODULE_ID}
+  - cat box.json
   # Only publish once
   - if [ ${ENGINE} = 'lucee@45' ]; then box forgebox publish; fi
