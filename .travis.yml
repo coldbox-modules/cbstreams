@@ -53,13 +53,7 @@ script:
   # move back to build dir to build it
   - cd $TRAVIS_BUILD_DIR
   # Build out the project if tests pass
-  - box task run \
-      taskfile=build/Build \
-      target=run \
-      :version=${TARGET_VERSION} \
-      :projectName=${MODULE_ID} \
-      :buildID=${TRAVIS_BUILD_NUMBER} \
-      :branch=${TRAVIS_BRANCH}
+  - box task run taskfile=build/Build target=run :version=${TARGET_VERSION} :projectName=${MODULE_ID} :buildID=${TRAVIS_BUILD_NUMBER} :branch=${TRAVIS_BRANCH}
 
 after_failure:
   - cd $TRAVIS_BUILD_DIR/test-harness
