@@ -1,5 +1,5 @@
 {
-    "name":"lucee@45",
+    "name":"cbstreams-lucee@45",
     "app":{
         "serverHomeDirectory":".engine/lucee45",
         "cfengine":"lucee@4.5"
