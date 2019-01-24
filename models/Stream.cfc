@@ -95,15 +95,18 @@ component accessors="true"{
 			return this;
 		}
 
-		// If Query
+		// If Query, convert to a stream of appropriate ranged size.
 		if( isQuery( arguments.collection ) ){
-			// TODO:
+			return rangeClosed( 1, arguments.collection.recordcount )
+				.map( function( index ){
+					return collection.getRow( index );
+				} );
 		}
 
 		throw(
-			message="Cannot create stream from incoming collection",
-			type="InvalidColletionType",
-			detail="#getMetadata( arguments.collection ).toString()#"
+			message = "Cannot create stream from incoming collection",
+			type    = "InvalidColletionType",
+			detail  = "#getMetadata( arguments.collection ).toString()#"
 		);
 	}
 

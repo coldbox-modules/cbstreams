@@ -50,6 +50,26 @@
 				});
 			});
 
+
+			story( "I can generate streams from a query", function(){
+				given( "a query", function(){
+					then( "it will generate the correct stream", function(){
+						var q = querySim( "id,name
+						1 | luis
+						2 | Joe
+						3 | Bill
+						4 | Juan" );
+
+						var data = new cbstreams.models.Stream( q )
+							.filter( function( item ){
+								return item.name.findNoCase( "ui" );
+							} )
+							.toArray();
+						expect( arrayLen( data ) ).toBe( 1 );
+					});
+				});
+			});
+
 			story( "I can generate streams from different providers", function(){
 				given( "a sequential stream using the `of` method", function(){
 					then( "an ordered stream will be created", function(){
@@ -77,8 +97,8 @@
 				} );
 			});
 
-			story( 
-				story="I can use generation of streams", 
+			story(
+				story="I can use generation of streams",
 				skip=( !server.keyExists( "lucee" ) ),
 				body=function(){
 				given( "a limited infinite stream", function() {
@@ -313,8 +333,8 @@
 
 			story( "I can do numerical operations on streams", function(){
 				beforeEach( function(){
-					numberStream = new cbstreams.models.Stream( 
-						collection="1,2,3,4,5,6", 
+					numberStream = new cbstreams.models.Stream(
+						collection="1,2,3,4,5,6",
 						isNumeric=true
 					);
 				} );
@@ -361,7 +381,7 @@
 							.collectGroupingBy( function( item ){
 								return item.price;
 							} );
-						
+
 						expect( aPeople[ 25 ] ).toHaveLength( 1 );
 						expect( aPeople[ 30 ] ).toHaveLength( 2 );
 					} );
@@ -383,7 +403,7 @@
 							.collectAverage( function( item ){
 								return item.price;
 							} );
-						
+
 						expect(	aAverage ).toBeGT( 28 );
 					} );
 				} );
@@ -411,7 +431,7 @@
 							} )
 							.sorted()
 							.collect();
-						
+
 						expect( aNames ).toHaveLength( 3 ).toBeArray();
 					} );
 				} );
@@ -424,7 +444,7 @@
 							} )
 							.sorted()
 							.collectAsList( "|" );
-						
+
 						expect( aNames ).toBeString();
 						expect( listLen( aNames, "|" ) ).toBe( 3 );
 					} );
@@ -432,7 +452,7 @@
 
 				given( "The struct collector and a key and id mapper", function(){
 					then( "it will produce a struct of the collection of those mappers", function(){
-						
+
 						var results = new cbStreams.models.Stream( people )
 							.collectAsStruct( "id", "name" );
 						expect( results )

@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.3.0
+
+* Native ColdFusion Query Support
+
 ## v1.2.1
 
 * Fixes on `map()` when using ranges to switch the types to `any`
