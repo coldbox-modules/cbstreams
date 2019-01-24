@@ -8,6 +8,11 @@ component accessors="true"{
 	 */ 
 	property name="jStream";
 
+	/**
+	 * If this stream has a specific Java Type, defaults to "" or any
+	 */
+	property name="jType" default="any";
+
 	// Static Stream Class Access
 	variables.coreStream    = createObject( "java", "java.util.stream.Stream" );
 	variables.intStream    	= createObject( "java", "java.util.stream.IntStream" );
@@ -31,6 +36,9 @@ component accessors="true"{
 		// Determine carray ast type for incoming collection, default is any object.
 		var castType = "java.lang.Object[]";
 
+		// Defaults to any
+		variables.type = "any";
+
 		// Verify numeric shortcut
 		if( arguments.isNumeric ){
 			arguments.primitive = "long";
@@ -38,9 +46,21 @@ component accessors="true"{
 
 		// Determine primitive type
 		switch( arguments.primitive ){
-			case "int"    : { castType = "int[]"; break; }
-			case "long"   : { castType = "long[]"; break; }
-			case "double" : { castType = "double[]"; break; }
+			case "int"    : { 
+				castType = "int[]"; 
+				variables.type = "int";
+				break; 
+			}
+			case "long"   : { 
+				castType = "long[]"; 
+				variables.type = "long";
+				break; 
+			}
+			case "double" : { 
+				castType = "double[]"; 
+				variables.type = "double";
+				break; 
+			}
 		}
 
 		// If a list, enhance to array
@@ -154,7 +174,7 @@ component accessors="true"{
 	 * @supplier A closure or lambda that will supply the generated elements
 	 */
 	Stream function generate( required supplier ){
-		variables.jStream = variables.jStream.generate( 
+		variables.jStream = variables.coreStream.generate( 
 
 			createDynamicProxy(
 				new proxies.Supplier( arguments.supplier ),
@@ -166,31 +186,8 @@ component accessors="true"{
 	}
 
 	/**
-	 * Returns an infinite sequential ordered Stream produced by iterative application of a function f to an initial element seed, 
-	 * producing a Stream consisting of seed, f(seed), f(f(seed)), etc.
-	 * The first element (position 0) in the Stream will be the provided seed. For n > 0, the element at position n, 
-	 * will be the result of applying the function f to the element at position n - 1.
-	 * 
-	 * Each f receives the previous seed
-	 * 
-	 * @seed the initial element
-	 * @f a function to be applied to to the previous element to produce a new element
-	 * 
-	 */
-	Stream function iterate( required seed, required f ){
-		variables.jStream = variables.jStream.iterate( 
-			arguments.seed,
-			createDynamicProxy(
-				new proxies.UnaryOperator( arguments.f ),
-				[ "java.util.function.UnaryOperator" ]
-			)
-		);
-		return this;
-	}
-
-	/**
-	 * Returns a sequential ordered IntStream from start (inclusive) to end (exclusive) by an incremental step of 1.
-	 * See https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html
+	 * Returns a sequential ordered LongStream from start (inclusive) to end (exclusive) by an incremental step of 1.
+	 * See https://docs.oracle.com/javase/8/docs/api/java/util/stream/LongStream.html
 	 */
 	Stream function range( required numeric start, required numeric end ){
 		if( variables.isLucee ){
@@ -198,6 +195,7 @@ component accessors="true"{
 				javaCast( "long", arguments.start ),
 				javaCast( "long", arguments.end )
 			);
+			variables.jType = "long";
 		} else {
 			var a = [];
 			for( var x = arguments.start; x lt arguments.end; x++ ){
@@ -210,8 +208,8 @@ component accessors="true"{
 	}
 
 	/**
-	 * Returns a sequential ordered IntStream from start (inclusive) to end (inclusive) by an incremental step of 1.
-	 * See https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html
+	 * Returns a sequential ordered LongStream from start (inclusive) to end (inclusive) by an incremental step of 1.
+	 * See https://docs.oracle.com/javase/8/docs/api/java/util/stream/LongStream.html
 	 */
 	Stream function rangeClosed( required numeric start, required numeric end ){
 		if( variables.isLucee ){
@@ -219,6 +217,7 @@ component accessors="true"{
 				javaCast( "long", arguments.start ),
 				javaCast( "long", arguments.end )
 			);
+			variables.jType = "long";
 		} else {
 			var a = [];
 			for( var x = arguments.start; x lte arguments.end; x++ ){
@@ -297,12 +296,22 @@ component accessors="true"{
 	 * @mapper The closure or lambda to map apply to each element
 	 */
 	Stream function map( required mapper ){
-		variables.jStream = variables.jStream.map(
-			createDynamicProxy( 
-				new proxies.Function( arguments.mapper ), 
-				[ "java.util.function.Function" ] 
-			)
-		);
+		if( isStrongTyped() ){
+			variables.jStream = variables.jStream.mapToObj(
+				createDynamicProxy( 
+					new proxies.Function( arguments.mapper ), 
+					[ "java.util.function.#getStrongTypePrefix()#Function" ] 
+				)
+			);
+		} else {
+			variables.jStream = variables.jStream.map(
+				createDynamicProxy( 
+					new proxies.Function( arguments.mapper ), 
+					[ "java.util.function.Function" ] 
+				)
+			);
+		}
+		
 		return this;
 	}
 
@@ -314,12 +323,22 @@ component accessors="true"{
 	 * @predicate a non-interfering, stateless predicate to apply to each element to determine if it should be included
 	 */
 	Stream function filter( required predicate ){
-		variables.jStream = variables.jStream.filter(
-			createDynamicProxy( 
-				new proxies.Predicate( arguments.predicate ), 
-				[ "java.util.function.Predicate" ] 
-			)
-		);
+		if( isStrongTyped() ){
+			variables.jStream = variables.jStream.filter(
+				createDynamicProxy( 
+					new proxies.Predicate( arguments.predicate ), 
+					[ "java.util.function.#getStrongTypePrefix()#Predicate" ] 
+				)
+			);
+		} else {
+			variables.jStream = variables.jStream.filter(
+				createDynamicProxy( 
+					new proxies.Predicate( arguments.predicate ), 
+					[ "java.util.function.Predicate" ] 
+				)
+			);
+		}
+
 		return this;
 	}
 	
@@ -411,12 +430,22 @@ component accessors="true"{
 	 * @action a non-interfering action to perform on the elements as they are consumed from the stream lambda or closure
 	 */
 	Stream function peek( required action ){
-		variables.jStream = variables.jStream.peek(
-			createDynamicProxy(
-				new proxies.Consumer( arguments.action ),
-				[ "java.util.function.Consumer" ]
-			)
-		);
+		if( isStrongTyped() ){
+			variables.jStream = variables.jStream.peek(
+				createDynamicProxy(
+					new proxies.Consumer( arguments.action ),
+					[ "java.util.function.#getStrongTypePrefix()#Consumer" ]
+				)
+			);
+		} else {
+			variables.jStream = variables.jStream.peek(
+				createDynamicProxy(
+					new proxies.Consumer( arguments.action ),
+					[ "java.util.function.Consumer" ]
+				)
+			);
+		}
+
 		return this;
 	}
 
@@ -507,12 +536,21 @@ component accessors="true"{
 	 * @action a non-interfering action to perform on the elements 
 	 */
 	void function forEach( required action ){
-		variables.jStream.forEach(
-			createDynamicProxy( 
-				new proxies.Consumer( arguments.action ), 
-				[ "java.util.function.Consumer" ] 
-			)
-		);
+		if( isStrongTyped() ){
+			variables.jStream.forEach(
+				createDynamicProxy( 
+					new proxies.Consumer( arguments.action ), 
+					[ "java.util.function.#getStrongTypePrefix()#Consumer" ] 
+				)
+			);
+		} else {
+			variables.jStream.forEach(
+				createDynamicProxy( 
+					new proxies.Consumer( arguments.action ), 
+					[ "java.util.function.Consumer" ] 
+				)
+			);
+		}
 	}
 
 	/**
@@ -525,12 +563,21 @@ component accessors="true"{
 	 * @action a non-interfering action to perform on the elements 
 	 */
 	void function forEachOrdered( required action ){
-		variables.jStream.forEachOrdered(
-			createDynamicProxy( 
-				new proxies.Consumer( arguments.action ), 
-				[ "java.util.function.Consumer" ] 
-			)
-		);
+		if( isStrongTyped() ){
+			variables.jStream.forEachOrdered(
+				createDynamicProxy( 
+					new proxies.Consumer( arguments.action ), 
+					[ "java.util.function.#getStrongTypePrefix()#Consumer" ] 
+				)
+			);
+		} else {
+			variables.jStream.forEachOrdered(
+				createDynamicProxy( 
+					new proxies.Consumer( arguments.action ), 
+					[ "java.util.function.Consumer" ] 
+				)
+			);
+		}
 	}
 
 	/**
@@ -546,10 +593,17 @@ component accessors="true"{
 	 * @identity the identity value for the accumulating function. If not used, then the accumulator is used in isolation
 	 */
 	function reduce( required accumulator, identity ){
-		var proxy = createDynamicProxy( 
-			new proxies.BinaryOperator( arguments.accumulator ), 
-			[ "java.util.function.BinaryOperator" ] 
-		);
+		if( isStrongTyped() ){
+			var proxy = createDynamicProxy( 
+				new proxies.BinaryOperator( arguments.accumulator ), 
+				[ "java.util.function.#getStrongTypePrefix()#BinaryOperator" ] 
+			);
+		} else {
+			var proxy = createDynamicProxy( 
+				new proxies.BinaryOperator( arguments.accumulator ), 
+				[ "java.util.function.BinaryOperator" ] 
+			);
+		}
 
 		// Accumulator Only
 		if( isNull( arguments.identity ) ){
@@ -572,12 +626,21 @@ component accessors="true"{
 	 * @predicate a non-interfering, stateless predicate to apply to elements of this stream
 	 */
 	boolean function anyMatch( required predicate ){
-		return variables.jStream.anyMatch(
-			createDynamicProxy( 
-				new proxies.Predicate( arguments.predicate ), 
-				[ "java.util.function.Predicate" ] 
-			)
-		);
+		if( isStrongTyped() ){
+			return variables.jStream.anyMatch(
+				createDynamicProxy( 
+					new proxies.Predicate( arguments.predicate ), 
+					[ "java.util.function.#getStrongTypePrefix()#Predicate" ] 
+				)
+			);
+		} else {
+			return variables.jStream.anyMatch(
+				createDynamicProxy( 
+					new proxies.Predicate( arguments.predicate ), 
+					[ "java.util.function.Predicate" ] 
+				)
+			);
+		}
 	}
 
 	/**
@@ -590,12 +653,21 @@ component accessors="true"{
 	 * @predicate a non-interfering, stateless predicate to apply to elements of this stream
 	 */
 	boolean function allMatch( required predicate ){
-		return variables.jStream.allMatch(
-			createDynamicProxy( 
-				new proxies.Predicate( arguments.predicate ), 
-				[ "java.util.function.Predicate" ] 
-			)
-		);
+		if( isStrongTyped() ){
+			return variables.jStream.allMatch(
+				createDynamicProxy( 
+					new proxies.Predicate( arguments.predicate ), 
+					[ "java.util.function.#getStrongTypePrefix()#Predicate" ] 
+				)
+			);
+		} else {
+			return variables.jStream.allMatch(
+				createDynamicProxy( 
+					new proxies.Predicate( arguments.predicate ), 
+					[ "java.util.function.Predicate" ] 
+				)
+			);
+		}
 	}
 
 	/**
@@ -608,12 +680,21 @@ component accessors="true"{
 	 * @predicate a non-interfering, stateless predicate to apply to elements of this stream
 	 */
 	boolean function noneMatch( required predicate ){
-		return variables.jStream.noneMatch(
-			createDynamicProxy( 
-				new proxies.Predicate( arguments.predicate ), 
-				[ "java.util.function.Predicate" ] 
-			)
-		);
+		if( isStrongTyped() ){
+			return variables.jStream.noneMatch(
+				createDynamicProxy( 
+					new proxies.Predicate( arguments.predicate ), 
+					[ "java.util.function.#getStrongTypePrefix()#Predicate" ] 
+				)
+			);
+		} else {
+			return variables.jStream.noneMatch(
+				createDynamicProxy( 
+					new proxies.Predicate( arguments.predicate ), 
+					[ "java.util.function.Predicate" ] 
+				)
+			);
+		}
 	}
 
 	/**
@@ -923,5 +1004,24 @@ component accessors="true"{
 			"min"		: arguments.stats.getMin(),
 			"sum" 		: arguments.stats.getSum()
 		};
+	}
+
+	/**
+	 * Check if this stream is strong typed
+	 */
+	private boolean function isStrongTyped(){
+		return !!listFindNoCase( "long,int,double", variables.jType );
+	}
+
+	/**
+	 * Return the strong type prefix for classes according to types
+	 */
+	private function getStrongTypePrefix(){
+		switch( variables.jType ){
+			case "int" : { return "Int"; }
+			case "Long" : { return "Long"; }
+			case "Double" : { return "Double"; }
+			default : { return ""; }
+		}
 	}
 }

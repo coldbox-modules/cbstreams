@@ -53,6 +53,7 @@ You're now ready to leverage streams!
 
 These tutorials on Java Streams are fantastic. We encourage you to read them to see the power of streams. You can also find the `cbstreams` API Docs to be a great source of information: [http://apidocs.ortussolutions.com/#/coldbox-modules/cbstreams](http://apidocs.ortussolutions.com/#/coldbox-modules/cbstreams)
 
+- [Streams Cheatsheet](http://files.zeroturnaround.com/pdf/zt_java8_streams_cheat_sheet.pdf)
 - [Java Streams Examples](http://winterbe.com/posts/2014/07/31/java8-stream-tutorial-examples/)
 - [Java 8 Streams Introduction](http://www.baeldung.com/java-8-streams-introduction)
 - [Java 8 Streams](http://www.baeldung.com/java-8-streams)

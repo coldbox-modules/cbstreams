@@ -77,17 +77,46 @@
 				} );
 			});
 
+			story( 
+				story="I can use generation of streams", 
+				skip=( !server.keyExists( "lucee" ) ),
+				body=function(){
+				given( "a limited infinite stream", function() {
+					then( "a stream of data will be generated", function() {
+						var data = new cbstreams.models.Stream().generate( function(){
+							return createUUID();
+						} )
+						.limit( 5 )
+						.collect();
+
+						expect( data.len() ).toBe( 5 );
+					} );
+				} );
+			} );
+
 			story( "I can generate streams from ranges", function(){
 				given( "An open range of 1-4", function(){
 					then( "a stream of 3 will be created", function(){
-						var stream = new cbstreams.models.Stream().range( 1, 4 );
-						expect( stream.count() ).toBe( 3 );
+						var data = new cbstreams.models.Stream()
+							.range( 1, 4 )
+							.map( function( item ){
+								return createUUID();
+							} )
+							.toArray();
+
+						expect( arrayLen( data ) ).toBe( 3 );
 					});
 				});
 				given( "A closed range of 1-4", function(){
 					then( "a stream of 4 will be created", function(){
-						var stream = new cbstreams.models.Stream().rangeClosed( 1, 4 );
-						expect( stream.count() ).toBe( 4 );
+						var data = new cbstreams.models.Stream()
+							.rangeClosed( 1, 4 )
+							.map( function( item ){
+								return createUUID();
+							} )
+							.toArray();
+
+						expect( arrayLen( data ) ).toBe( 4 );
 					});
 				});
 			});
