@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.2.1
+
+* Fixes on `map()` when using ranges to switch the types to `any`
+
 ## v1.2.0
 
 * Fix the `generate()` to use the correct stream class. Only works on lucee, adobe fails on interface default method executions.

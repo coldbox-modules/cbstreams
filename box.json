@@ -1,6 +1,6 @@
 {
     "name":"CBStreams",
-    "version":"1.2.0",
+    "version":"1.2.1",
     "location":"https://downloads.ortussolutions.com/ortussolutions/coldbox-modules/cbstreams/@build.version@/cbstreams-@build.version@.zip",
     "author":"Ortus Solutions, Corp",
     "homepage":"https://github.com/ortus-solutions/cbstreams",
@@ -34,6 +34,6 @@
         "*/.md"
     ],
     "scripts":{
-		"toMaster":"recipe build/toMaster.boxr"
+        "toMaster":"recipe build/toMaster.boxr"
     }
 }
