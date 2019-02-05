@@ -3,6 +3,7 @@
 ## v1.3.0
 
 * Native ColdFusion Query Support
+* Native Java arrays support when passing native java arrays to build streams out of them
 
 ## v1.2.1
 

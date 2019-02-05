@@ -70,9 +70,14 @@ component accessors="true"{
 
 		// If Array
 		if( isArray( arguments.collection ) ){
-			variables.jStream = variables.Arrays.stream(
-				javaCast( castType, arguments.collection )
-			);
+			// Check if the array is already a Java array, no need of casting
+			if( arguments.collection.getClass().getCanonicalName().findNoCase( "coldfusion" ) ){
+				variables.jStream = variables.Arrays.stream(
+					javaCast( castType, arguments.collection )
+				);
+			} else {
+				variables.jStream = variables.Arrays.stream( arguments.collection );
+			}
 			return this;
 		}
 
