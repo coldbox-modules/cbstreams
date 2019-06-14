@@ -204,7 +204,7 @@ Terminal operations are a way to finalize the execution of the stream.  Please n
 - `findFirst()` - Find the first element in the stream
 - `forEach( action )` - Iterate through all elements and call the action consuming closure or lambda.
 - `forEachOrdered( action )` - Iterate through all elements in order and call the action consuming closure or lambda.
-- `reduce( accumulator, identity )` - (also sometimes called a fold) performs a reduction of the stream to a single element. You want to sum all the integer values in the stream – you want to use the reduce function. You want to find the maximum in the stream – reduce is your friend.
+- `reduce( accumulator, identity )` - (also sometimes called a fold) performs a reduction of the stream to a single element. You want to sum all the integer values in the stream – you want to use the reduce function. You want to find the maximum in the stream – reduce is your friend.  **Important:** Using reduce in a parallel stream is currently not supported and can cause unexpected results as the initial identity value and accumulator need to run sequentially (otherwise they would need to maintain state and streams are stateless). Either use a `map` or run your reducer in a `sequential` stream. 
 - `anyMatch( predicate )` - Returns a boolean that indicates if any elements match the predicate closure/lambda
 - `allMatch( predicate )` - Returns a boolean that indicates if ALL elements matched the predicate closure/lambda
 - `noneMatch( predicate )` - Returns a boolean that indicates if NONE of the elements matched the predicate closure/lambda

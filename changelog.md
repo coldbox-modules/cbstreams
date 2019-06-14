@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.4.0
+
+* Ability to add a file encoding when doing file streams via `ofFile( path, encoding = "UTF-8" )` with UTF-8 being the default.
+* The `Optional` class gets several new methods:
+  * `isEmpty()` - Returns true if the value is empty else false
+  * `ifPresentOrElse( consumer, runnable )` - If a value is present, performs the given action with the value, otherwise performs the given empty-based action.
+  * `orElseRun( runnable )` - Runs the `runnable` closure/lambda if the value is not set and the same optional instance is returned.
+  * `$or( supplier ), or( supplier )` - If a value is present, returns an Optional describing the value, otherwise returns an Optional produced by the supplying function value.
+  * `orElseThrow( type, message )` - If a value is present, returns the value, otherwise throws NoSuchElementException.
+
+
 ## v1.3.0
 
 * Native ColdFusion Query Support
