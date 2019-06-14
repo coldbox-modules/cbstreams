@@ -164,14 +164,17 @@ component accessors="true"{
 	 * Create a stream from a file. Every line of the text becomes an element of the stream:
 	 *
 	 * @path The absolute path of the file to generate a stream from
+	 * @encoding The encoding of the file, the default is `UTF-8`
 	 */
-	Stream function ofFile( required string path ){
+	Stream function ofFile( required string path, encoding="UTF-8" ){
 
-		variables.jStream = createObject( "java", "java.nio.file.Files" ).lines(
-			createObject( "java", "java.nio.file.Paths" ).get(
-				createObject( "java", "java.io.File" ).init( arguments.path ).toURI()
-			)
-		);
+        variables.jStream = createObject( "java", "java.nio.file.Files" )
+            .lines(
+                createObject( "java", "java.nio.file.Paths" ).get(
+                    createObject( "java", "java.io.File" ).init( arguments.path ).toURI()
+                ),
+                createObject( "java", "java.nio.charset.Charset" ).forName( arguments.encoding )
+		    );
 
 		return this;
 	}
