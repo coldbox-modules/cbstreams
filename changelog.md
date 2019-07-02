@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.5.0
+
+* Added ACF support for `java.util.ArrayList` native arrays to be casted correctly to Java Streams.
+* Experimental: Added the ability to transfer page contexts and fusion contexts for running parallel threads. This is a major breakthrough for parallelization of the fork join framework and bridging to the CFML engines. Only works on ACF, and partially.
+
 ## v1.4.0
 
 * Ability to add a file encoding when doing file streams via `ofFile( path, encoding = "UTF-8" )` with UTF-8 being the default.

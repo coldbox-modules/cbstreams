@@ -2,7 +2,7 @@
  * Functional interface that maps to java.util.Comparator
  * See https://docs.oracle.com/javase/8/docs/api/java/util/Comparator.html
  */
-component{ 
+component extends="BaseProxy"{
 
     /**
      * Constructor
@@ -10,7 +10,7 @@ component{
      * @f Target lambda or closure
      */
     function init( required f ){
-        variables.target = arguments.f;
+		super.init( arguments.f );
         variables[ "equals" ] = variables.isEqual;
         return this;
     }
@@ -19,6 +19,7 @@ component{
      * Compares its two arguments for order.
      */
     function compare( o1, o2 ){
+		loadContext();
         return variables.target( arguments.o1, arguments.o2 );
     }
 

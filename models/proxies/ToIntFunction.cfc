@@ -2,7 +2,7 @@
  * Functional interface that maps to java.util.function.ToIntFunction
  * See https://docs.oracle.com/javase/8/docs/api/java/util/function/ToIntFunction.html
  */
-component{ 
+component extends="BaseProxy"{
 
     /**
      * Constructor
@@ -10,7 +10,7 @@ component{
      * @f a function to be applied to to the previous element to produce a new element
      */
     function init( required f ){
-        variables.target = arguments.f;
+        super.init( arguments.f );
         return this;
     }
 
@@ -18,6 +18,7 @@ component{
      * Functional interface for the apply functionional interface
      */
     function applyAsInt( required value ){
+		loadContext();
         return variables.target( arguments.value );
     }
 

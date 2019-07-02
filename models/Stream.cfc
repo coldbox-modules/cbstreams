@@ -72,7 +72,7 @@ component accessors="true"{
 		if( isArray( arguments.collection ) ){
 			// Check if the array is already a Java array, no need of casting
 			if(
-				reFindNoCase( "(coldfusion|lucee)", arguments.collection.getClass().getCanonicalName() )
+				reFindNoCase( "(coldfusion|lucee|java\.util\.ArrayList)", arguments.collection.getClass().getCanonicalName() )
 			){
 				variables.jStream = variables.Arrays.stream(
 					javaCast( castType, arguments.collection )

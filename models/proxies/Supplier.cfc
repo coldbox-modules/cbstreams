@@ -1,4 +1,4 @@
-component{ 
+component extends="BaseProxy"{
 
     /**
      * Constructor
@@ -6,7 +6,7 @@ component{
      * @supplier The lambda or closure that will supply the elements
      */
     function init( required supplier ){
-        variables.target = arguments.supplier;
+		super.init( arguments.supplier );
         return this;
     }
 
@@ -15,6 +15,7 @@ component{
      * See https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html
      */
     function get(){
+		loadContext();
         return variables.target();
     }
 }
