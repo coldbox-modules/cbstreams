@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/coldbox-modules/cbstreams.svg?branch=development)](https://travis-ci.org/coldbox-modules/cbstreams)
+
 # CB Streams
 
 Welcome to the wonderful world of Java Streams ported for the CFML world!
