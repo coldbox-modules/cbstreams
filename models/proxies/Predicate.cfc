@@ -11,9 +11,12 @@ component extends="BaseProxy"{
      */
     function init( required f ){
 		super.init( arguments.f );
+
         // Stupid ACF Compiler
         variables[ "and" ]  = variables[ "$and" ];
-        variables[ "or" ]   = variables[ "$or" ];
+		variables[ "or" ]   = variables[ "$or" ];
+		this[ "and" ]  		= variables[ "$and" ];
+        this[ "or" ]   		= variables[ "$or" ];
         return this;
     }
 
@@ -22,9 +25,9 @@ component extends="BaseProxy"{
      *
      * @t
      */
-    boolean function test( t ){
+    boolean function test( required t ){
 		loadContext();
-        return variables.target( arguments.t );
+		return variables.target( arguments.t );
     }
 
 

@@ -19,7 +19,7 @@ component extends="BaseProxy"{
      */
     function apply( t ){
 		loadContext();
-        return variables.target( t );
+        return variables.target( arguments.t );
     }
 
     function andThen( after ){}

@@ -15,16 +15,17 @@ component accessors="true"{
      */
     function init( required target ){
 		// Store target closure/lambda
-		variables.target = arguments.target;
+		variables.target 				= arguments.target;
 		variables.loadedContextHashCode = "";
+		variables.System 				= createObject( "java", "java.lang.System" );
+		variables.Thread 				= createObject( "java", "java.lang.Thread" );
 
 		// Preapre for parallel executions to enable the right fusion context
 		if( server.keyExists( "lucee") ){
-			// TODO: Need lucee way to approach this
+			variables.cfContext = getCFMLContext().getApplicationContext();
 		} else {
-			variables.cfContext = getPageContext().getFusionContext();
+			variables.cfContext = getCFMLContext().getFusionContext();
 		}
-
 
         return this;
 	}
@@ -36,29 +37,16 @@ component accessors="true"{
 		// Only load it, if in a streamed thread.
 		if( inStreamThread() ){
 
-			if( !isContextLoaded() ){
-				lock
-					name="cbstreams.contextloading.#getCurrentThreadName()#"
-					throwOnTimeout=true
-					timeout=5
-					type="exclusive"
-				{
-					if( !isContextLoaded() ){
+			//out( "==> Context NOT loaded for thread: #getCurrentThread().toString()# loading it..." );
 
-						this.println( "==> Context NOT loaded for thread: #getCurrentThreadName()#, loading it..." );
-
-						// Lucee vs Adobe Implementations
-						if( server.keyExists( "lucee") ){
-
-						} else {
-							getCFMLContext().getFusionContext().setCurrent( variables.cfContext.clone() );
-						}
-
-						request[ "cbstreams-pcloaded-#getCurrentThreadName()#" ] = true;
-					}
-				}
+			// Lucee vs Adobe Implementations
+			if( server.keyExists( "lucee" ) ){
+				getCFMLContext().setApplicationContext( variables.cfContext );
 			} else {
-				this.println( "Context loaded for thread: #getCurrentThreadName()#, skipping it..." );
+				// Get Fusion Context loaded
+				var context = getCFMLContext();
+				context.getFusionContext().setCurrent( variables.cfContext );
+				context.setFusionContext( variables.cfContext );
 			}
 
 		} // end if in stream thread
@@ -68,7 +56,7 @@ component accessors="true"{
 	 * Verify if context is loaded or not
 	 */
 	boolean function isContextLoaded(){
-		return structKeyExists( request, "cbstreams-pcloaded-#getCurrentThreadName()#" );
+		return structKeyExists( request, "cbstreams-pcloaded-#getThreadName()#" );
 	}
 
 	/**
@@ -82,7 +70,7 @@ component accessors="true"{
 	* Check if you are in cfthread or not for any CFML Engine
 	*/
 	boolean function inStreamThread(){
-		return ( findNoCase( "fork", getCurrentThread().getName() ) NEQ 0 );
+		return ( findNoCase( "fork", getThreadName() ) NEQ 0 );
 	}
 
 	/**
@@ -91,7 +79,7 @@ component accessors="true"{
 	 * @return java.lang.Thread
 	 */
 	function getCurrentThread(){
-		return createObject( "java", "java.lang.Thread" ).currentThread();
+		return variables.Thread.currentThread();
 	}
 
 	/**
@@ -99,18 +87,26 @@ component accessors="true"{
 	 *
 	 * @text
 	 */
-	function getCurrentThreadName(){
+	function getThreadName(){
 		return getCurrentThread().getName();
 	}
 
 	/**
-	 * Out helper for debugging, else all is in vanity
+	 * Out helper for debugging, else all is in vain
 	 *
-	 * @text
+	 * @var
 	 */
-	function println( required text ){
-		createObject( "java", "java.lang.System" ).out.printLn( arguments.text );
-		return this;
+	function out( required var ){
+		variables.System.out.printLn( arguments.var.toString() );
+	}
+
+	/**
+	 * Error helper for debugging, else all is in vain
+	 *
+	 * @var
+	 */
+	function err( required var ){
+		variables.System.err.printLn( arguments.var.toString() );
 	}
 
 }

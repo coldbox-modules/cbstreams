@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.6.0
+
+### New Features
+
+* Added `collectAsSet()` to collect items into a non-duplicate set instance
+* Added mappings for API Docs
+* Added more experimental Adobe/Lucee CFML Context loading for parallel streams
+
 ## v1.5.0
 
 * Added ACF support for `java.util.ArrayList` native arrays to be casted correctly to Java Streams.

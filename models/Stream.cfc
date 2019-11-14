@@ -886,6 +886,17 @@ component accessors="true"{
 	}
 
 	/**
+	 * Collect the items to a set which doesn't include duplicate elements.
+	 *
+	 * This is a terminal operation.
+	 */
+	function collectAsSet(){
+		return variables.jStream.collect(
+			variables.Collectors.toSet()
+		);
+	}
+
+	/**
 	 * Collect the items to a string list using delimiters and/or a prefix and suffix.
 	 * The cool things is that you don't even need to know the start or end of the stream for applying the prefix and suffix
 	 *

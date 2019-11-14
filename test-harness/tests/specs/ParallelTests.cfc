@@ -19,12 +19,12 @@ component extends="testbox.system.BaseSpec"{
 			});
 
 
-			xit( "testing parallel threads", function(){
+			it( title="testing parallel threads", skip=( !server.keyExists( "lucee" )), body=function(){
 
 				var results = new cbstreams.models.Stream( [
 					"one", "two", "three", "four", "six", "seven", "eight", "nine"
 					] )
-					.parallel()
+					//.parallel()
 					.filter( function( item ){
 						try{
 							out.println( "**** Filter (#arguments.item#) Thread Name: #createObject( "java", "java.lang.Thread" ).currentThread().getName()#" );
@@ -35,10 +35,10 @@ component extends="testbox.system.BaseSpec"{
 							rethrow;
 						}
 					} )
-					//.map( function( item ){
-					//	out.println( "**** Map (#arguments.item#) Thread Name: #createObject( "java", "java.lang.Thread" ).currentThread().getName()#" );
-					//	return ucase( arguments.item );
-					//} )
+					.map( function( item ){
+						out.println( "**** Map (#arguments.item#) Thread Name: #createObject( "java", "java.lang.Thread" ).currentThread().getName()#" );
+						return ucase( arguments.item );
+					} )
 					.collect();
 
 				expect( results ).toHaveLength( 5 );
