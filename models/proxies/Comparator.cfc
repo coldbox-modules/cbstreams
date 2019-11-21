@@ -20,7 +20,13 @@ component extends="BaseProxy"{
      */
     function compare( o1, o2 ){
 		loadContext();
-        return variables.target( arguments.o1, arguments.o2 );
+		try {
+			lock name='#getConcurrentEngineLockName()#' type="exclusive" timeout="60" {
+     			return variables.target( arguments.o1, arguments.o2 );
+     		}
+        } finally {
+        	unLoadContext();
+        }
     }
 
     function comparing(keyExtractor, keyComparator){}

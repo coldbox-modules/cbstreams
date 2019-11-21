@@ -16,10 +16,16 @@ component extends="BaseProxy"{
 
     function run(){
 		loadContext();
-        if( isClosure( variables.target ) || isCustomFunction( variables.target ) ){
-            variables.target();
-        } else{
-            variables.target.run();
+		try {
+	        if( isClosure( variables.target ) || isCustomFunction( variables.target ) ){
+				lock name='#getConcurrentEngineLockName()#' type="exclusive" timeout="60" {
+	            	variables.target();
+	            }
+	        } else{
+	            variables.target.run();
+	        }
+        } finally {
+        	unLoadContext();
         }
     }
 

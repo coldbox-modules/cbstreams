@@ -19,7 +19,13 @@ component extends="BaseProxy"{
      */
     function apply( t ){
 		loadContext();
-        return variables.target( arguments.t );
+		try {
+			lock name='#getConcurrentEngineLockName()#' type="exclusive" timeout="60" { 
+	        	return variables.target( arguments.t );
+	        }
+        } finally {
+        	unLoadContext();
+        }
     }
 
     function andThen( after ){}

@@ -9,14 +9,15 @@ component extends="BaseProxy"{
      *
      * @f The lambda or closure to be used in the <code>apply()</code> method
      */
-    function init( required f ){
-		super.init( arguments.f );
-
+    function init( required f ){        
+		super.init( arguments.f );				
+			
         // Stupid ACF Compiler
         variables[ "and" ]  = variables[ "$and" ];
 		variables[ "or" ]   = variables[ "$or" ];
 		this[ "and" ]  		= variables[ "$and" ];
         this[ "or" ]   		= variables[ "$or" ];
+        
         return this;
     }
 
@@ -27,7 +28,13 @@ component extends="BaseProxy"{
      */
     boolean function test( required t ){
 		loadContext();
-		return variables.target( arguments.t );
+		try {
+			lock name='#getConcurrentEngineLockName()#' type="exclusive" timeout="60" {
+				return variables.target( arguments.t );
+			}
+        } finally {
+        	unLoadContext();
+        }
     }
 
 

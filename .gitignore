@@ -1,4 +1,7 @@
 .vscode
+.project
+.settings
+settings.xml
 
 .artifacts/**
 .tmp/**

@@ -19,15 +19,16 @@ component extends="testbox.system.BaseSpec"{
 			});
 
 
-			it( title="testing parallel threads", skip=( !server.keyExists( "lucee" )), body=function(){
+			it( title="testing parallel threads", body=function(){
 
 				var results = new cbstreams.models.Stream( [
 					"one", "two", "three", "four", "six", "seven", "eight", "nine"
 					] )
-					//.parallel()
+					.parallel()
 					.filter( function( item ){
 						try{
-							out.println( "**** Filter (#arguments.item#) Thread Name: #createObject( "java", "java.lang.Thread" ).currentThread().getName()#" );
+							//out.println( "**** Filter (#arguments.item#) Thread Name: #createObject( "java", "java.lang.Thread" ).currentThread().getName()#" );
+							//out.println( "mappings : " & getApplicationMetadata()?.mappings?.keyList() );
 						 	return arguments.item.len() > 3;
 						} catch( any e ){
 							out.println( e.message );
@@ -36,7 +37,7 @@ component extends="testbox.system.BaseSpec"{
 						}
 					} )
 					.map( function( item ){
-						out.println( "**** Map (#arguments.item#) Thread Name: #createObject( "java", "java.lang.Thread" ).currentThread().getName()#" );
+						// out.println( "**** Map (#arguments.item#) Thread Name: #createObject( "java", "java.lang.Thread" ).currentThread().getName()#" );
 						return ucase( arguments.item );
 					} )
 					.collect();
