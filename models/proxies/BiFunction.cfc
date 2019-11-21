@@ -21,7 +21,7 @@ component extends="BaseProxy"{
     function apply( required previous, required item ){
 		loadContext();
 		try {
-			lock name='#getConcurrentEngineLockName()#' type="exclusive" timeout="10" {
+			lock name='#getConcurrentEngineLockName()#' type="exclusive" timeout="60" {
         		return variables.target( arguments.previous, arguments.item );
         	}	
         } finally {
