@@ -23,8 +23,12 @@ component accessors="true"{
 
 		// Preapre for parallel executions to enable the right fusion context
 		if( server.keyExists( "lucee") ){
-			variables.cfContext = getCFMLContext().getApplicationContext();
-			variables.pageContext = getCFMLContext();
+			variables.ThreadLocalPageContextStatic = createObject( 'java', 'lucee.runtime.engine.ThreadLocalPageContext' );
+			variables.ThreadUtilStatic = createObject( 'java', 'lucee.runtime.thread.ThreadUtil' );
+			variables.applicationContextOriginal = getPageContext().getApplicationContext();
+			variables.DEV_NULL_OUTPUT_STREAM = createObject( 'java', 'lucee.commons.io.DevNullOutputStream' ).DEV_NULL_OUTPUT_STREAM;
+			variables.originalPageContext = getPageContext();
+			
 		} else {
 			variables.fusionContextStatic = createObject( 'java', 'coldfusion.filter.FusionContext' );
 		    variables.originalFusionContext = fusionContextStatic.getCurrent();
@@ -44,11 +48,33 @@ component accessors="true"{
 		// Only load it, if in a streamed thread.
 		if( inStreamThread() ){
 
-			//out( "==> Context NOT loaded for thread: #getCurrentThread().toString()# loading it..." );
+			//out( "==> Loading Context for thread: #getCurrentThread().toString()#" );
 
 			// Lucee vs Adobe Implementations
 			if( server.keyExists( "lucee" ) ){
-				getCFMLContext().setApplicationContext( variables.cfContext );
+				 
+				// This is basically useless due to java.util.ConcurrentModificationException
+				/*var pageContext = variables.ThreadUtilStatic.clonePageContext(
+					variables.originalPageContext,
+					variables.DEV_NULL_OUTPUT_STREAM,
+					false,
+					true,
+					true );*/
+					
+				variables.ThreadLocalPageContextStatic.register( originalPageContext );
+				
+				getPageContext().setApplicationContext( variables.applicationContextOriginal );
+				
+				// Workaround to try and keep some of these available in the pc this template is already using
+				url.append( variables.originalPageContext.urlScope() );
+				form.append( variables.originalPageContext.formScope() );
+				request.append( variables.originalPageContext.requestScope() );
+				// The cgi scope and HTTP request headers will not be available.  The PageContent gives me on way to register those outside of reflection
+				
+				// This works to copy state into our current pc, but it blows away the local variables scope and stuff disappears :/
+				//pageContext.copyStateTo( getPageContext() );
+			
+				
 			} else {
 				var fusionContext = variables.originalFusionContext.clone();
 				var pageContext = variables.originalPageContext.clone();
@@ -60,7 +86,7 @@ component accessors="true"{
 				variables.fusionContextStatic.setCurrent( fusionContext );
 				fusionContext.pageContext = pageContext;
 				pageContext.setFusionContext( fusionContext );
-				pageContext.initializeWith( page, pageContext, pageContext.getVariableScope() );		
+				pageContext.initializeWith( page, pageContext, pageContext.getVariableScope() );
 			}
 
 		} // end if in stream thread
@@ -77,7 +103,9 @@ component accessors="true"{
 
 			// Lucee vs Adobe Implementations
 			if( server.keyExists( "lucee" ) ){
-				// Nothing right now
+				// I can't use either of these.  NPE errors all over the place.
+				//variables.ThreadLocalPageContextStatic.release();
+				//getPageContext().getConfig().getFactory().releasePageContext( getPageContext() );
 			} else {
 			   variables.fusionContextStatic.setCurrent( javaCast( 'null', '' ) );
 			}

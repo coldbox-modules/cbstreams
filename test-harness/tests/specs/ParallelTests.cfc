@@ -28,7 +28,8 @@ component extends="testbox.system.BaseSpec"{
 					.filter( function( item ){
 						try{
 							//out.println( "**** Filter (#arguments.item#) Thread Name: #createObject( "java", "java.lang.Thread" ).currentThread().getName()#" );
-							//out.println( "mappings : " & getApplicationMetadata()?.mappings?.keyList() );
+							//out.println( "mappings: " & getApplicationMetadata().mappings.keyList() );
+							//out.println( "url: " & url.count() & " -- form: " & form.keyList() & " -- request: " & request.keyList() & " -- headers: "  & getHTTPRequestData().headers.count() & " -- cgi: " & cgi.script_name );
 						 	return arguments.item.len() > 3;
 						} catch( any e ){
 							out.println( e.message );
