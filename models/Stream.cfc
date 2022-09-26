@@ -891,6 +891,8 @@ component accessors="true" {
 	 * Collect the items to a set which doesn't include duplicate elements.
 	 *
 	 * This is a terminal operation.
+	 *
+	 * @return java.util.HashSet
 	 */
 	function collectAsSet(){
 		return variables.jStream.collect( variables.Collectors.toSet() );

@@ -11,9 +11,7 @@ The beauty of streams is that the elements in a stream are processed and passed 
 You can also leverage streams in parallel for parallel execution and take it further with concurrent programming.
 
 ```js
-// Lucee 5 lambdas
-
-streamBuilder.new( [ "d2", "a2", "b1", "b3", "c" ] )
+stream( [ "d2", "a2", "b1", "b3", "c" ] )
     .map( (s) => {
         writedump( "map: " & s );
         return s.ucase();
@@ -63,10 +61,10 @@ These tutorials on Java Streams are fantastic. We encourage you to read them to 
 
 ## Usage
 
-In order to start working with streams you must leverage WireBox and inject `StreamBuilder@cbstreams`.  This factory has two methods for your streaming pleasure:
+In order to start working with streams you must leverage WireBox and inject `StreamBuilder@cbstreams` or use the ColdBox Helper methods avaialable in all handlers, interceptors, layouts/views: `stream(), streamBuilder()`.  If you inject the `StreamBuilder` directly then you can call it's methods directly:
 
 - `new( any collection="", isNumeric=false, primitive=""  )` - Returns a new `Stream.cfc` according to passed arguments
-- `builder()` - Returns a Stream Builder that maps to the `Builder.cfc` so you can build a stream manually.
+- `builder()` - Returns a Stream Builder that maps to the `cbstreams.models.Builder.cfc` so you can build a stream manually.
 
 We encourage you to learn our [API Docs](https://apidocs.ortussolutions.com/coldbox-modules/cbstreams/current/index.html) to see how to interact with streams.  We try our best to map static Java types to loose typed ColdFusion types. If you find anything that doesn't work, please create issues here: [Issues](https://github.com/coldbox-modules/cbstreams/issues)
 
@@ -89,6 +87,11 @@ You can also pass **nothing** and create an empty stream.
 You can generate empty streams by just calling on the `new()` method or using the `empty()` method in the Stream class.
 
 ```js
+// Helpers
+emptyStream = stream();
+emptyStream = stream().empty();
+
+// Injection
 emptyStream = streamBuilder.new();
 emptyStream = streamBuilder.new().empty();
 ```
@@ -98,11 +101,20 @@ emptyStream = streamBuilder.new().empty();
 You can build your own stream with your own data by using our Stream Builder. Just get access to the builder and add your data with the `add()` method.
 
 ```js
+// Helpers
+builder = streamBuilder();
+myData.each( function( item ){
+    builder.add( item );
+} );
+myStream = builder.build();
+
+// Injection
 builder = streamBuilder.builder();
 myData.each( function( item ){
     builder.add( item );
 } );
 myStream = builder.build();
+
 ```
 
 Make sure you call the `build()` method on the builder to give you an instance of the Stream CFC.
@@ -112,6 +124,7 @@ Make sure you call the `build()` method on the builder to give you an instance o
 You can leverage the `of()` method to pass in arguments to build a stream out of all the arguments passed to it:
 
 ```js
+stream = stream().of( "a", "hello", "stream" );
 stream = streamBuilder.new().of( "a", "hello", "stream" );
 ```
 
@@ -120,6 +133,7 @@ stream = streamBuilder.new().of( "a", "hello", "stream" );
 You can leverage the `ofChars()` method to create a character stream from an existing string.
 
 ```js
+stream = stream().ofChars( "Welcome to Streams" );
 stream = streamBuilder.new().ofChars( "Welcome to Streams" );
 ```
 
@@ -130,6 +144,7 @@ This will create a stream of every character in the string sequence.
 We have also added an `ofFile()` method to help you create streams from files using the Java non-blocking IO classes.  The stream will represent every line in the file so you can navigate through it.
 
 ```js
+stream = stream().ofFile( absolutePath );
 stream = streamBuilder.new().ofFile( absolutePath );
 try{
     work on the stream and close it in the finally block;
@@ -173,6 +188,7 @@ stream = streamBuilder.new().rangeClosed( 1, 2030 );
 By default all streams are generated as sequential streams.  You can also mark a stream to leverage parallel programming by calling on the `parallel()` method.  You can also convert it back to sequential by using the `sequential()` method.
 
 ```js
+stream = stream().range(1, 200 ).parallel();
 stream = streamBuilder.new().range(1, 200 ).parallel();
 ```
 
