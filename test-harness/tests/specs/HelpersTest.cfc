@@ -12,8 +12,10 @@ component extends="coldbox.system.testing.BaseTestCase" {
 			} );
 
 			it( "can use register the 'streamBuilder' helper method", function(){
-				var event = get( route = "/main/builder", params = {} );
-				expect( event.getHandlerResults() ).toHaveLength( 3 );
+				if ( server.coldfusion.productVersion.listFirst() neq "2018"){
+					var event = get( route = "/main/builder", params = {} );
+					expect( event.getHandlerResults() ).toHaveLength( 3 );
+				}
 			} );
 		} );
 	}
