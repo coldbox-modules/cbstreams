@@ -4,15 +4,15 @@ Copyright 2005-2007 ColdBox Framework by Luis Majano and Ortus Solutions, Corp
 www.ortussolutions.com
 ********************************************************************************
 */
-component{
+component {
 
 	// structDelete( application, "cbController" );
 	// applicationStop();
 	// abort;
 
 	// UPDATE THE NAME OF THE MODULE IN TESTING BELOW
-	request.MODULE_NAME = "mementifier";
-	request.MODULE_PATH = "mementifier";
+	request.MODULE_NAME = "cbstreams";
+	request.MODULE_PATH = "cbstreams";
 
 	// APPLICATION CFC PROPERTIES
 	this.name                 = "ColdBoxTestingSuite";
@@ -28,12 +28,16 @@ component{
 	this.mappings[ "/tests" ] = getDirectoryFromPath( getCurrentTemplatePath() );
 
 	// The application root
-	rootPath = REReplaceNoCase( this.mappings[ "/tests" ], "tests(\\|/)", "" );
-	this.mappings[ "/root" ]   = rootPath;
+	rootPath                 = reReplaceNoCase( this.mappings[ "/tests" ], "tests(\\|/)", "" );
+	this.mappings[ "/root" ] = rootPath;
 
 	// The module root path
-	moduleRootPath = REReplaceNoCase( this.mappings[ "/root" ], "#request.module_name#(\\|/)test-harness(\\|/)", "" );
-	this.mappings[ "/moduleroot" ] = moduleRootPath;
+	moduleRootPath = reReplaceNoCase(
+		this.mappings[ "/root" ],
+		"#request.module_name#(\\|/)test-harness(\\|/)",
+		""
+	);
+	this.mappings[ "/moduleroot" ]            = moduleRootPath;
 	this.mappings[ "/#request.MODULE_NAME#" ] = moduleRootPath & "#request.MODULE_NAME#";
 
 	public boolean function onRequestStart( targetPage ){
@@ -52,7 +56,7 @@ component{
 			if ( structKeyExists( server, "lucee" ) ) {
 				pagePoolClear();
 			}
-			//ormReload();
+			// ormReload();
 			request.coldBoxVirtualApp.restart();
 		}
 
@@ -68,4 +72,5 @@ component{
 		var value  = system.getEnv( "FULL_NULL" );
 		return isNull( value ) ? false : !!value;
 	}
+
 }

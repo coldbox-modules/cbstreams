@@ -1,7 +1,7 @@
 /**
  * This is a transient class that models a Java Stream: https://docs.oracle.com/javase/8/docs/api/?java/util/stream/Stream.html
  */
-component accessors="true"{
+component accessors="true" {
 
 	/**
 	 * The Java Stream we represent
@@ -14,11 +14,11 @@ component accessors="true"{
 	property name="jType" default="any";
 
 	// Static Stream Class Access
-	variables.coreStream    = createObject( "java", "java.util.stream.Stream" );
-	variables.intStream    	= createObject( "java", "java.util.stream.IntStream" );
-	variables.longStream    = createObject( "java", "java.util.stream.LongStream" );
-	variables.Collectors    = createObject( "java", "java.util.stream.Collectors" );
-	variables.Arrays        = createObject( "java", "java.util.Arrays" );
+	variables.coreStream = createObject( "java", "java.util.stream.Stream" );
+	variables.intStream  = createObject( "java", "java.util.stream.IntStream" );
+	variables.longStream = createObject( "java", "java.util.stream.LongStream" );
+	variables.Collectors = createObject( "java", "java.util.stream.Collectors" );
+	variables.Arrays     = createObject( "java", "java.util.Arrays" );
 
 	// Lucee pivot
 	variables.isLucee = server.keyExists( "lucee" );
@@ -29,10 +29,14 @@ component accessors="true"{
 	 * This is useful when doing mathematical operations on the stream.
 	 *
 	 * @collection This is an optional collection to build a stream on: List, Array, Struct, Query
-	 * @isNumeric This is a shorthand for doing a numeric typed array of values. This will choose a long stream for you by default.
-	 * @primitive If you will be doing operations on the stream, you can mark it with a primitive type of: int, long or double. Else we will use generic object streams
+	 * @isNumeric  This is a shorthand for doing a numeric typed array of values. This will choose a long stream for you by default.
+	 * @primitive  If you will be doing operations on the stream, you can mark it with a primitive type of: int, long or double. Else we will use generic object streams
 	 */
-	Stream function init( any collection="", isNumeric=false, primitive="" ){
+	Stream function init(
+		any collection = "",
+		isNumeric      = false,
+		primitive      = ""
+	){
 		// Determine carray ast type for incoming collection, default is any object.
 		var castType = "java.lang.Object[]";
 
@@ -40,43 +44,44 @@ component accessors="true"{
 		variables.type = "any";
 
 		// Verify numeric shortcut
-		if( arguments.isNumeric ){
+		if ( arguments.isNumeric ) {
 			arguments.primitive = "long";
 		}
 
 		// Determine primitive type
-		switch( arguments.primitive ){
-			case "int"    : {
-				castType = "int[]";
+		switch ( arguments.primitive ) {
+			case "int": {
+				castType       = "int[]";
 				variables.type = "int";
 				break;
 			}
-			case "long"   : {
-				castType = "long[]";
+			case "long": {
+				castType       = "long[]";
 				variables.type = "long";
 				break;
 			}
-			case "double" : {
-				castType = "double[]";
+			case "double": {
+				castType       = "double[]";
 				variables.type = "double";
 				break;
 			}
 		}
 
 		// If a list, enhance to array
-		if( isSimpleValue( arguments.collection ) ){
+		if ( isSimpleValue( arguments.collection ) ) {
 			arguments.collection = listToArray( arguments.collection );
 		}
 
 		// If Array
-		if( isArray( arguments.collection ) ){
+		if ( isArray( arguments.collection ) ) {
 			// Check if the array is already a Java array, no need of casting
-			if(
-				reFindNoCase( "(coldfusion|lucee|java\.util\.ArrayList)", arguments.collection.getClass().getCanonicalName() )
-			){
-				variables.jStream = variables.Arrays.stream(
-					javaCast( castType, arguments.collection )
-				);
+			if (
+				reFindNoCase(
+					"(coldfusion|lucee|java\.util\.ArrayList)",
+					arguments.collection.getClass().getCanonicalName()
+				)
+			) {
+				variables.jStream = variables.Arrays.stream( javacast( castType, arguments.collection ) );
 			} else {
 				variables.jStream = variables.Arrays.stream( arguments.collection );
 			}
@@ -84,9 +89,8 @@ component accessors="true"{
 		}
 
 		// If Struct
-		if( isStruct( arguments.collection ) ){
-
-			if( variables.isLucee ){
+		if ( isStruct( arguments.collection ) ) {
+			if ( variables.isLucee ) {
 				variables.jStream = arguments.collection.entrySet().stream();
 			} else {
 				arguments.collection = createObject( "java", "java.util.HashMap" )
@@ -94,20 +98,17 @@ component accessors="true"{
 					.entrySet()
 					.toArray();
 
-				variables.jStream = variables.Arrays.stream(
-					arguments.collection
-				);
+				variables.jStream = variables.Arrays.stream( arguments.collection );
 			}
 
 			return this;
 		}
 
 		// If Query, convert to a stream of appropriate ranged size.
-		if( isQuery( arguments.collection ) ){
-			return rangeClosed( 1, arguments.collection.recordcount )
-				.map( function( index ){
-					return collection.getRow( index );
-				} );
+		if ( isQuery( arguments.collection ) ) {
+			return rangeClosed( 1, arguments.collection.recordcount ).map( function( index ){
+				return collection.getRow( index );
+			} );
 		}
 
 		throw(
@@ -130,13 +131,13 @@ component accessors="true"{
 	 *
 	 */
 	Stream function of(){
-		if( arguments.isEmpty() ){
-			throw( message="Please pass at least one value", type="InvalidValues" );
+		if ( arguments.isEmpty() ) {
+			throw( message = "Please pass at least one value", type = "InvalidValues" );
 		}
 
 		// Doing it this way so acf11 is supported
 		var sequence = [];
-		arguments.each( function( k,v ){
+		arguments.each( function( k, v ){
 			sequence.append( v );
 		} );
 
@@ -150,11 +151,11 @@ component accessors="true"{
 	 * @target The string to convert to a stream using its characters
 	 */
 	Stream function ofChars( required string target ){
-		if( variables.isLucee ){
+		if ( variables.isLucee ) {
 			variables.jStream = arguments.target.chars();
 		} else {
 			variables.jStream = variables.Arrays.stream(
-				javaCast( "java.lang.Object[]", listToArray( arguments.target, "" ) )
+				javacast( "java.lang.Object[]", listToArray( arguments.target, "" ) )
 			);
 		}
 		return this;
@@ -163,18 +164,16 @@ component accessors="true"{
 	/**
 	 * Create a stream from a file. Every line of the text becomes an element of the stream:
 	 *
-	 * @path The absolute path of the file to generate a stream from
+	 * @path     The absolute path of the file to generate a stream from
 	 * @encoding The encoding of the file, the default is `UTF-8`
 	 */
-	Stream function ofFile( required string path, encoding="UTF-8" ){
-
-        variables.jStream = createObject( "java", "java.nio.file.Files" )
-            .lines(
-                createObject( "java", "java.nio.file.Paths" ).get(
-                    createObject( "java", "java.io.File" ).init( arguments.path ).toURI()
-                ),
-                createObject( "java", "java.nio.charset.Charset" ).forName( arguments.encoding )
-		    );
+	Stream function ofFile( required string path, encoding = "UTF-8" ){
+		variables.jStream = createObject( "java", "java.nio.file.Files" ).lines(
+			createObject( "java", "java.nio.file.Paths" ).get(
+				createObject( "java", "java.io.File" ).init( arguments.path ).toURI()
+			),
+			createObject( "java", "java.nio.charset.Charset" ).forName( arguments.encoding )
+		);
 
 		return this;
 	}
@@ -188,12 +187,10 @@ component accessors="true"{
 	 */
 	Stream function generate( required supplier ){
 		variables.jStream = variables.coreStream.generate(
-
 			createDynamicProxy(
-				new proxies.Supplier( arguments.supplier ),
+				new coldbox.system.async.proxies.Supplier( arguments.supplier ),
 				[ "java.util.function.Supplier" ]
 			)
-
 		);
 		return this;
 	}
@@ -203,15 +200,15 @@ component accessors="true"{
 	 * See https://docs.oracle.com/javase/8/docs/api/java/util/stream/LongStream.html
 	 */
 	Stream function range( required numeric start, required numeric end ){
-		if( variables.isLucee ){
+		if ( variables.isLucee ) {
 			variables.jStream = variables.longStream.range(
-				javaCast( "long", arguments.start ),
-				javaCast( "long", arguments.end )
+				javacast( "long", arguments.start ),
+				javacast( "long", arguments.end )
 			);
 			variables.jType = "long";
 		} else {
 			var a = [];
-			for( var x = arguments.start; x lt arguments.end; x++ ){
+			for ( var x = arguments.start; x lt arguments.end; x++ ) {
 				a.append( x );
 			}
 			init( a );
@@ -225,15 +222,15 @@ component accessors="true"{
 	 * See https://docs.oracle.com/javase/8/docs/api/java/util/stream/LongStream.html
 	 */
 	Stream function rangeClosed( required numeric start, required numeric end ){
-		if( variables.isLucee ){
+		if ( variables.isLucee ) {
 			variables.jStream = variables.longStream.rangeClosed(
-				javaCast( "long", arguments.start ),
-				javaCast( "long", arguments.end )
+				javacast( "long", arguments.start ),
+				javacast( "long", arguments.end )
 			);
 			variables.jType = "long";
 		} else {
 			var a = [];
-			for( var x = arguments.start; x lte arguments.end; x++ ){
+			for ( var x = arguments.start; x lte arguments.end; x++ ) {
 				a.append( x );
 			}
 			init( a );
@@ -246,7 +243,7 @@ component accessors="true"{
 	 * Returns an empty sequential Stream.
 	 */
 	Stream function empty(){
-		if( variables.isLucee ){
+		if ( variables.isLucee ) {
 			variables.jStream = variables.coreStream.empty();
 		} else {
 			init();
@@ -262,7 +259,7 @@ component accessors="true"{
 	 * Please see warnings for parallel streams: https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#limit-long-
 	 */
 	Stream function limit( required numeric maxSize ){
-		variables.jStream = variables.jStream.limit( javaCast( "long", arguments.maxSize ) );
+		variables.jStream = variables.jStream.limit( javacast( "long", arguments.maxSize ) );
 		return this;
 	}
 
@@ -276,10 +273,11 @@ component accessors="true"{
 
 	/**
 	 * Returns a stream consisting of the remaining elements of this stream after discarding the first n elements of the stream. If this stream contains fewer than n elements then an empty stream will be returned.
+	 *
 	 * @n the number of leading elements to skip
 	 */
 	Stream function skip( required numeric n ){
-		variables.jStream = variables.jStream.skip( javaCast( "long", arguments.n ) );
+		variables.jStream = variables.jStream.skip( javacast( "long", arguments.n ) );
 		return this;
 	}
 
@@ -291,14 +289,11 @@ component accessors="true"{
 	 * @comparator A lambda or closure to apply as a comparator when sorting.
 	 */
 	Stream function sorted( comparator ){
-		if( isNull( arguments.comparator ) ){
+		if ( isNull( arguments.comparator ) ) {
 			variables.jStream = variables.jStream.sorted();
 		} else {
 			variables.jStream = variables.jStream.sorted(
-				createDynamicProxy(
-					new proxies.Comparator( arguments.comparator ),
-					[ "java.util.Comparator" ]
-				)
+				createDynamicProxy( new proxies.Comparator( arguments.comparator ), [ "java.util.Comparator" ] )
 			);
 		}
 		return this;
@@ -306,13 +301,14 @@ component accessors="true"{
 
 	/**
 	 * Returns a stream consisting of the results of applying the given function to the elements of this stream.
+	 *
 	 * @mapper The closure or lambda to map apply to each element
 	 */
 	Stream function map( required mapper ){
-		if( isStrongTyped() ){
+		if ( isStrongTyped() ) {
 			variables.jStream = variables.jStream.mapToObj(
 				createDynamicProxy(
-					new proxies.Function( arguments.mapper ),
+					new coldbox.system.async.proxies.Function( arguments.mapper ),
 					[ "java.util.function.#getStrongTypePrefix()#Function" ]
 				)
 			);
@@ -320,7 +316,7 @@ component accessors="true"{
 		} else {
 			variables.jStream = variables.jStream.map(
 				createDynamicProxy(
-					new proxies.Function( arguments.mapper ),
+					new coldbox.system.async.proxies.Function( arguments.mapper ),
 					[ "java.util.function.Function" ]
 				)
 			);
@@ -337,7 +333,7 @@ component accessors="true"{
 	 * @predicate a non-interfering, stateless predicate to apply to each element to determine if it should be included
 	 */
 	Stream function filter( required predicate ){
-		if( isStrongTyped() ){
+		if ( isStrongTyped() ) {
 			variables.jStream = variables.jStream.filter(
 				createDynamicProxy(
 					new proxies.Predicate( arguments.predicate ),
@@ -399,7 +395,7 @@ component accessors="true"{
 	Stream function onClose( required closeHandler ){
 		variables.jStream = variables.jStream.onClose(
 			createDynamicProxy(
-				new proxies.Runnable( arguments.closeHandler ),
+				new coldbox.system.async.proxies.Runnable( arguments.closeHandler ),
 				[ "java.lang.Runnable" ]
 			)
 		);
@@ -434,27 +430,27 @@ component accessors="true"{
 	 *
 	 * <pre>
 	 * Stream.of("one", "two", "three", "four")
-     *    .filter( (e) +> e.len() > 3 )
-     *    .peek( (e) => SystemOutput( "Filtered value: " & e, true ) )
-     *    .map( (item) => item.toUpperCase() )
-     *    .peek( (e) => SystemOutput( "Mapped value: " & e, true ) )
-     *    .collect();
+	 *    .filter( (e) +> e.len() > 3 )
+	 *    .peek( (e) => SystemOutput( "Filtered value: " & e, true ) )
+	 *    .map( (item) => item.toUpperCase() )
+	 *    .peek( (e) => SystemOutput( "Mapped value: " & e, true ) )
+	 *    .collect();
 	 *</pre>
 	 *
 	 * @action a non-interfering action to perform on the elements as they are consumed from the stream lambda or closure
 	 */
 	Stream function peek( required action ){
-		if( isStrongTyped() ){
+		if ( isStrongTyped() ) {
 			variables.jStream = variables.jStream.peek(
 				createDynamicProxy(
-					new proxies.Consumer( arguments.action ),
+					new coldbox.system.async.proxies.Consumer( arguments.action ),
 					[ "java.util.function.#getStrongTypePrefix()#Consumer" ]
 				)
 			);
 		} else {
 			variables.jStream = variables.jStream.peek(
 				createDynamicProxy(
-					new proxies.Consumer( arguments.action ),
+					new coldbox.system.async.proxies.Consumer( arguments.action ),
 					[ "java.util.function.Consumer" ]
 				)
 			);
@@ -550,17 +546,17 @@ component accessors="true"{
 	 * @action a non-interfering action to perform on the elements
 	 */
 	void function forEach( required action ){
-		if( isStrongTyped() ){
+		if ( isStrongTyped() ) {
 			variables.jStream.forEach(
 				createDynamicProxy(
-					new proxies.Consumer( arguments.action ),
+					new coldbox.system.async.proxies.Consumer( arguments.action ),
 					[ "java.util.function.#getStrongTypePrefix()#Consumer" ]
 				)
 			);
 		} else {
 			variables.jStream.forEach(
 				createDynamicProxy(
-					new proxies.Consumer( arguments.action ),
+					new coldbox.system.async.proxies.Consumer( arguments.action ),
 					[ "java.util.function.Consumer" ]
 				)
 			);
@@ -577,17 +573,17 @@ component accessors="true"{
 	 * @action a non-interfering action to perform on the elements
 	 */
 	void function forEachOrdered( required action ){
-		if( isStrongTyped() ){
+		if ( isStrongTyped() ) {
 			variables.jStream.forEachOrdered(
 				createDynamicProxy(
-					new proxies.Consumer( arguments.action ),
+					new coldbox.system.async.proxies.Consumer( arguments.action ),
 					[ "java.util.function.#getStrongTypePrefix()#Consumer" ]
 				)
 			);
 		} else {
 			variables.jStream.forEachOrdered(
 				createDynamicProxy(
-					new proxies.Consumer( arguments.action ),
+					new coldbox.system.async.proxies.Consumer( arguments.action ),
 					[ "java.util.function.Consumer" ]
 				)
 			);
@@ -604,10 +600,10 @@ component accessors="true"{
 	 * This is a terminal operation.
 	 *
 	 * @accumulator an associative, non-interfering, stateless function for combining two values
-	 * @identity the identity value for the accumulating function. If not used, then the accumulator is used in isolation
+	 * @identity    the identity value for the accumulating function. If not used, then the accumulator is used in isolation
 	 */
 	function reduce( required accumulator, identity ){
-		if( isStrongTyped() ){
+		if ( isStrongTyped() ) {
 			var proxy = createDynamicProxy(
 				new proxies.BinaryOperator( arguments.accumulator ),
 				[ "java.util.function.#getStrongTypePrefix()#BinaryOperator" ]
@@ -620,7 +616,7 @@ component accessors="true"{
 		}
 
 		// Accumulator Only
-		if( isNull( arguments.identity ) ){
+		if ( isNull( arguments.identity ) ) {
 			return new Optional( variables.jStream.reduce( proxy ) );
 		}
 		// Accumulator + Identity Seed
@@ -640,7 +636,7 @@ component accessors="true"{
 	 * @predicate a non-interfering, stateless predicate to apply to elements of this stream
 	 */
 	boolean function anyMatch( required predicate ){
-		if( isStrongTyped() ){
+		if ( isStrongTyped() ) {
 			return variables.jStream.anyMatch(
 				createDynamicProxy(
 					new proxies.Predicate( arguments.predicate ),
@@ -667,7 +663,7 @@ component accessors="true"{
 	 * @predicate a non-interfering, stateless predicate to apply to elements of this stream
 	 */
 	boolean function allMatch( required predicate ){
-		if( isStrongTyped() ){
+		if ( isStrongTyped() ) {
 			return variables.jStream.allMatch(
 				createDynamicProxy(
 					new proxies.Predicate( arguments.predicate ),
@@ -694,7 +690,7 @@ component accessors="true"{
 	 * @predicate a non-interfering, stateless predicate to apply to elements of this stream
 	 */
 	boolean function noneMatch( required predicate ){
-		if( isStrongTyped() ){
+		if ( isStrongTyped() ) {
 			return variables.jStream.noneMatch(
 				createDynamicProxy(
 					new proxies.Predicate( arguments.predicate ),
@@ -723,7 +719,7 @@ component accessors="true"{
 	 * @comparator A comparator function or lambda
 	 */
 	Optional function max( comparator ){
-		if( isNull( arguments.comparator ) ){
+		if ( isNull( arguments.comparator ) ) {
 			return new Optional( variables.jStream.max() );
 		} else {
 			var oProxy = createDynamicProxy(
@@ -746,7 +742,7 @@ component accessors="true"{
 	 * @comparator A comparator function or lambda
 	 */
 	Optional function min( comparator ){
-		if( isNull( arguments.comparator ) ){
+		if ( isNull( arguments.comparator ) ) {
 			return new Optional( variables.jStream.min() );
 		} else {
 			var oProxy = createDynamicProxy(
@@ -775,7 +771,7 @@ component accessors="true"{
 	 *
 	 * @returnNative If true, then we will return the native Java object, else a struct of stats
 	 */
-	struct function summaryStatistics( boolean returnNative=false ){
+	struct function summaryStatistics( boolean returnNative = false ){
 		var stats = variables.jStream.summaryStatistics();
 		return ( arguments.returnNative ? stats : getNativeStatsStruct( stats ) );
 	}
@@ -798,31 +794,33 @@ component accessors="true"{
 	 * @classifier the classifier function mapping input elements to keys
 	 */
 	function collectGroupingBy( required classifier ){
-		return variables.jStream.collect( variables.Collectors.groupingBy(
-			createDynamicProxy(
-				new proxies.Function( arguments.classifier ),
-				[ "java.util.function.Function" ]
+		return variables.jStream.collect(
+			variables.Collectors.groupingBy(
+				createDynamicProxy(
+					new coldbox.system.async.proxies.Function( arguments.classifier ),
+					[ "java.util.function.Function" ]
+				)
 			)
-		) );
+		);
 	}
 
 	/**
 	 * Returns a Collector that produces the arithmetic mean of an integer-valued function applied to the input elements.
 	 * If no elements are present, the result is 0.
 	 *
-	 * @mapper The mapper lambda or closure to determine averages on
+	 * @mapper    The mapper lambda or closure to determine averages on
 	 * @primitive The primitive type to cast with, we default to 'long'. Accepted values are int, long, double
 	 */
-	function collectAverage( required mapper, primitive="long" ){
+	function collectAverage( required mapper, primitive = "long" ){
 		var proxy = createPrimitiveProxyFunction( arguments.mapper, arguments.primitive );
-		switch( arguments.primitive ){
-			case "int" : {
+		switch ( arguments.primitive ) {
+			case "int": {
 				return variables.jStream.collect( variables.Collectors.averagingInt( proxy ) );
 			}
-			case "double" :{
+			case "double": {
 				return variables.jStream.collect( variables.Collectors.averagingDouble( proxy ) );
 			}
-			default : {
+			default: {
 				return variables.jStream.collect( variables.Collectors.averagingLong( proxy ) );
 			}
 		}
@@ -831,19 +829,19 @@ component accessors="true"{
 	/**
 	 * Returns a Collector that produces the sum of a valued function applied to the input elements.
 	 *
-	 * @mapper The mapper lambda or closure to determine the sum on
+	 * @mapper    The mapper lambda or closure to determine the sum on
 	 * @primitive The primitive type to cast with, we default to 'long'. Accepted values are int, long, double
 	 */
-	function collectSum( required mapper, primitive="long" ){
+	function collectSum( required mapper, primitive = "long" ){
 		var proxy = createPrimitiveProxyFunction( arguments.mapper, arguments.primitive );
-		switch( arguments.primitive ){
-			case "int" : {
+		switch ( arguments.primitive ) {
+			case "int": {
 				return variables.jStream.collect( variables.Collectors.summingInt( proxy ) );
 			}
-			case "double" :{
+			case "double": {
 				return variables.jStream.collect( variables.Collectors.summingDouble( proxy ) );
 			}
-			default : {
+			default: {
 				return variables.jStream.collect( variables.Collectors.summingLong( proxy ) );
 			}
 		}
@@ -854,30 +852,34 @@ component accessors="true"{
 	 * returns summary statistics for the resulting values as a struct with the following keys:
 	 * average, count, max, min, sum.  You can also get the raw stats report by using the <code>returnNative</code> argument.
 	 *
-	 * @mapper The mapper lambda or closure to determine the statistics on
-	 * @primitive The primitive type to cast with, we default to 'long'. Accepted values are int, long, double
+	 * @mapper       The mapper lambda or closure to determine the statistics on
+	 * @primitive    The primitive type to cast with, we default to 'long'. Accepted values are int, long, double
 	 * @returnNative If true, this will return the SummaryStatistics object instead of the struct report.
 	 *
 	 * @return By default a struct with {average,count,max,min,sum}.
 	 */
-	function collectSummary( required mapper, primitive="long", boolean returnNative=false ){
-		var proxy	= createPrimitiveProxyFunction( arguments.mapper, arguments.primitive );
+	function collectSummary(
+		required mapper,
+		primitive            = "long",
+		boolean returnNative = false
+	){
+		var proxy    = createPrimitiveProxyFunction( arguments.mapper, arguments.primitive );
 		var oSummary = "";
 
-		switch( arguments.primitive ){
-			case "int" : {
+		switch ( arguments.primitive ) {
+			case "int": {
 				oSummary = variables.jStream.collect( variables.Collectors.summarizingInt( proxy ) );
 			}
-			case "double" :{
+			case "double": {
 				oSummary = variables.jStream.collect( variables.Collectors.summarizingDouble( proxy ) );
 			}
-			default : {
+			default: {
 				oSummary = variables.jStream.collect( variables.Collectors.summarizingLong( proxy ) );
 			}
 		}
 
 		// Native Results
-		if( arguments.returnNative ){
+		if ( arguments.returnNative ) {
 			return oSummary;
 		}
 
@@ -891,9 +893,7 @@ component accessors="true"{
 	 * This is a terminal operation.
 	 */
 	function collectAsSet(){
-		return variables.jStream.collect(
-			variables.Collectors.toSet()
-		);
+		return variables.jStream.collect( variables.Collectors.toSet() );
 	}
 
 	/**
@@ -903,12 +903,16 @@ component accessors="true"{
 	 * This is a terminal operation.
 	 *
 	 * @delimiter The delimiter to use in the list. The default is a comma (,)
-	 * @prefix A prefix to add to the stream result
-	 * @suffix A suffix to add to the stream result
+	 * @prefix    A prefix to add to the stream result
+	 * @suffix    A suffix to add to the stream result
 	 */
-	function collectAsList( delimiter=",", prefix="", suffix="" ){
+	function collectAsList( delimiter = ",", prefix = "", suffix = "" ){
 		return variables.jStream.collect(
-			variables.Collectors.joining( arguments.delimiter, arguments.prefix, arguments.suffix )
+			variables.Collectors.joining(
+				arguments.delimiter,
+				arguments.prefix,
+				arguments.suffix
+			)
 		);
 	}
 
@@ -918,23 +922,27 @@ component accessors="true"{
 	 * NOTE: the struct type will only work if the collection we are collecting is a struct or an object
 	 * This is a terminal operation.
 	 *
-	 * @keyID If using struct, then we need to know what will be the key value in the collection struct
-	 * @valueID If using struct, then we need to know what will be the value key in the collection struct
+	 * @keyID     If using struct, then we need to know what will be the key value in the collection struct
+	 * @valueID   If using struct, then we need to know what will be the value key in the collection struct
 	 * @overwrite If using struct, then do you overwrite elements if the same key id is found. Defaults is true.
 	 */
-	function collectAsStruct( required keyID, required valueID, boolean overwrite=true ){
-		if( isNull( arguments.keyID ) || isNull( arguments.valueID ) ){
+	function collectAsStruct(
+		required keyID,
+		required valueID,
+		boolean overwrite = true
+	){
+		if ( isNull( arguments.keyID ) || isNull( arguments.valueID ) ) {
 			throw( "Please pass in a 'keyID' and a 'valueID', if not we cannot build your struct." );
 		}
 
 		var keyFunction = createDynamicProxy(
-			new proxies.Function( function( item ){
+			new coldbox.system.async.proxies.Function( function( item ){
 				// If CFC, execute the method
-				if( isObject( arguments.item ) ){
+				if ( isObject( arguments.item ) ) {
 					return invoke( arguments.item, keyID );
 				}
 				// If struct, get the key
-				else if( isStruct( arguments.item ) ){
+				else if ( isStruct( arguments.item ) ) {
 					return arguments.item[ keyID ];
 				}
 				// Else, just return the item, nothing we can map
@@ -944,13 +952,13 @@ component accessors="true"{
 		);
 
 		var valueFunction = createDynamicProxy(
-			new proxies.Function( function( item ){
+			new coldbox.system.async.proxies.Function( function( item ){
 				// If CFC, execute the method
-				if( isObject( arguments.item ) ){
+				if ( isObject( arguments.item ) ) {
 					return invoke( arguments.item, valueID );
 				}
 				// If struct, get the key
-				else if( isStruct( arguments.item ) ){
+				else if ( isStruct( arguments.item ) ) {
 					return arguments.item[ valueID ];
 				}
 				// Else, just return the item, nothing we can map
@@ -972,7 +980,7 @@ component accessors="true"{
 	}
 
 	/**
-	 * Returns a Collector which partitions the input elements according to a Predicate, and organizes them into a Map<Boolean, List<T>>.
+	 * Returns a Collector which partitions the input elements according to a Predicate, and organizes them into a Map<boolean, List < T>>.
 	 *
 	 * @predicate a non-interfering, stateless predicate to apply to each element to determine if it should be included
 	 */
@@ -992,24 +1000,24 @@ component accessors="true"{
 	/**
 	 * Create a primitive typed proxy function
 	 *
-	 * @f The target closure or lambda
+	 * @f         The target closure or lambda
 	 * @primitive The target primitive
 	 */
 	private function createPrimitiveProxyFunction( required f, required primitive ){
-		switch( arguments.primitive ){
-			case "int" : {
+		switch ( arguments.primitive ) {
+			case "int": {
 				return createDynamicProxy(
 					new proxies.ToIntFunction( arguments.f ),
 					[ "java.util.function.ToIntFunction" ]
 				);
 			}
-			case "double" :{
+			case "double": {
 				return createDynamicProxy(
 					new proxies.ToDoubleFunction( arguments.f ),
 					[ "java.util.function.ToDoubleFunction" ]
 				);
 			}
-			default : {
+			default: {
 				return createDynamicProxy(
 					new proxies.ToLongFunction( arguments.f ),
 					[ "java.util.function.ToLongFunction" ]
@@ -1023,11 +1031,11 @@ component accessors="true"{
 	 */
 	private function getNativeStatsStruct( required stats ){
 		return {
-			"average" 	: arguments.stats.getAverage(),
-			"count"		: arguments.stats.getCount(),
-			"max"		: arguments.stats.getMax(),
-			"min"		: arguments.stats.getMin(),
-			"sum" 		: arguments.stats.getSum()
+			"average" : arguments.stats.getAverage(),
+			"count"   : arguments.stats.getCount(),
+			"max"     : arguments.stats.getMax(),
+			"min"     : arguments.stats.getMin(),
+			"sum"     : arguments.stats.getSum()
 		};
 	}
 
@@ -1042,11 +1050,20 @@ component accessors="true"{
 	 * Return the strong type prefix for classes according to types
 	 */
 	private function getStrongTypePrefix(){
-		switch( variables.jType ){
-			case "int" : { return "Int"; }
-			case "Long" : { return "Long"; }
-			case "Double" : { return "Double"; }
-			default : { return ""; }
+		switch ( variables.jType ) {
+			case "int": {
+				return "Int";
+			}
+			case "Long": {
+				return "Long";
+			}
+			case "Double": {
+				return "Double";
+			}
+			default: {
+				return "";
+			}
 		}
 	}
+
 }

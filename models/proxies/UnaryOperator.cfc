@@ -2,36 +2,45 @@
  * Functional interface that maps to java.util.function.UnaryOperator
  * See https://docs.oracle.com/javase/8/docs/api/java/util/function/UnaryOperator.html
  */
-component extends="BaseProxy"{
+component extends="BaseProxy" {
 
-    /**
-     * Constructor
-     *
-     * @f a function to be applied to to the previous element to produce a new element
-     */
-    function init( required f ){
-        super.init( arguments.f );
-        return this;
-    }
+	/**
+	 * Constructor
+	 *
+	 * @f a function to be applied to to the previous element to produce a new element
+	 */
+	function init( required f ){
+		super.init( arguments.f );
+		return this;
+	}
 
-    /**
-     * Functional interface for the apply functionional interface
-     * See https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html#apply-T-
-     */
-    function apply( required target ){
+	/**
+	 * Functional interface for the apply functionional interface
+	 * See https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html#apply-T-
+	 */
+	function apply( required target ){
 		loadContext();
 		try {
-			lock name='#getConcurrentEngineLockName()#' type="exclusive" timeout="60" {
-        		return variables.target( arguments.target );
-        	}
-        } finally {
-        	unLoadContext();
-        }
-    }
+			lock name="#getConcurrentEngineLockName()#" type="exclusive" timeout="60" {
+				return variables.target( arguments.target );
+			}
+		} catch ( any e ) {
+			// Log it, so it doesn't go to ether
+			err( "Error running Unary Operator: #e.message & e.detail#" );
+			err( "Stacktrace for Unary Operator: #e.stackTrace#" );
+			rethrow;
+		} finally {
+			unLoadContext();
+		}
+	}
 
-    function andThen( required after ){}
+	function andThen( required after ){
+	}
 
-    function compose( required before ){}
+	function compose( required before ){
+	}
 
-    function identity(){}
+	function identity(){
+	}
+
 }
