@@ -13,7 +13,7 @@
 		isNumeric      = false,
 		predicate      = ""
 	){
-		return getInstance( "StreamBuilder@cbstreams" ).new( argumentCollection = args );
+		return getInstance( "StreamBuilder@cbstreams" ).new( argumentCollection = arguments );
 	}
 
 	/**
