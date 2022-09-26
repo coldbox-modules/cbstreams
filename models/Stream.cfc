@@ -188,7 +188,7 @@ component accessors="true" {
 	Stream function generate( required supplier ){
 		variables.jStream = variables.coreStream.generate(
 			createDynamicProxy(
-				new coldbox.system.async.proxies.Supplier( arguments.supplier ),
+				new proxies.Supplier( arguments.supplier ),
 				[ "java.util.function.Supplier" ]
 			)
 		);
@@ -308,7 +308,7 @@ component accessors="true" {
 		if ( isStrongTyped() ) {
 			variables.jStream = variables.jStream.mapToObj(
 				createDynamicProxy(
-					new coldbox.system.async.proxies.Function( arguments.mapper ),
+					new proxies.Function( arguments.mapper ),
 					[ "java.util.function.#getStrongTypePrefix()#Function" ]
 				)
 			);
@@ -316,7 +316,7 @@ component accessors="true" {
 		} else {
 			variables.jStream = variables.jStream.map(
 				createDynamicProxy(
-					new coldbox.system.async.proxies.Function( arguments.mapper ),
+					new proxies.Function( arguments.mapper ),
 					[ "java.util.function.Function" ]
 				)
 			);
@@ -395,7 +395,7 @@ component accessors="true" {
 	Stream function onClose( required closeHandler ){
 		variables.jStream = variables.jStream.onClose(
 			createDynamicProxy(
-				new coldbox.system.async.proxies.Runnable( arguments.closeHandler ),
+				new proxies.Runnable( arguments.closeHandler ),
 				[ "java.lang.Runnable" ]
 			)
 		);
@@ -443,14 +443,14 @@ component accessors="true" {
 		if ( isStrongTyped() ) {
 			variables.jStream = variables.jStream.peek(
 				createDynamicProxy(
-					new coldbox.system.async.proxies.Consumer( arguments.action ),
+					new proxies.Consumer( arguments.action ),
 					[ "java.util.function.#getStrongTypePrefix()#Consumer" ]
 				)
 			);
 		} else {
 			variables.jStream = variables.jStream.peek(
 				createDynamicProxy(
-					new coldbox.system.async.proxies.Consumer( arguments.action ),
+					new proxies.Consumer( arguments.action ),
 					[ "java.util.function.Consumer" ]
 				)
 			);
@@ -549,14 +549,14 @@ component accessors="true" {
 		if ( isStrongTyped() ) {
 			variables.jStream.forEach(
 				createDynamicProxy(
-					new coldbox.system.async.proxies.Consumer( arguments.action ),
+					new proxies.Consumer( arguments.action ),
 					[ "java.util.function.#getStrongTypePrefix()#Consumer" ]
 				)
 			);
 		} else {
 			variables.jStream.forEach(
 				createDynamicProxy(
-					new coldbox.system.async.proxies.Consumer( arguments.action ),
+					new proxies.Consumer( arguments.action ),
 					[ "java.util.function.Consumer" ]
 				)
 			);
@@ -576,14 +576,14 @@ component accessors="true" {
 		if ( isStrongTyped() ) {
 			variables.jStream.forEachOrdered(
 				createDynamicProxy(
-					new coldbox.system.async.proxies.Consumer( arguments.action ),
+					new proxies.Consumer( arguments.action ),
 					[ "java.util.function.#getStrongTypePrefix()#Consumer" ]
 				)
 			);
 		} else {
 			variables.jStream.forEachOrdered(
 				createDynamicProxy(
-					new coldbox.system.async.proxies.Consumer( arguments.action ),
+					new proxies.Consumer( arguments.action ),
 					[ "java.util.function.Consumer" ]
 				)
 			);
@@ -797,7 +797,7 @@ component accessors="true" {
 		return variables.jStream.collect(
 			variables.Collectors.groupingBy(
 				createDynamicProxy(
-					new coldbox.system.async.proxies.Function( arguments.classifier ),
+					new proxies.Function( arguments.classifier ),
 					[ "java.util.function.Function" ]
 				)
 			)
@@ -938,7 +938,7 @@ component accessors="true" {
 		}
 
 		var keyFunction = createDynamicProxy(
-			new coldbox.system.async.proxies.Function( function( item ){
+			new proxies.Function( function( item ){
 				// If CFC, execute the method
 				if ( isObject( arguments.item ) ) {
 					return invoke( arguments.item, keyID );
@@ -954,7 +954,7 @@ component accessors="true" {
 		);
 
 		var valueFunction = createDynamicProxy(
-			new coldbox.system.async.proxies.Function( function( item ){
+			new proxies.Function( function( item ){
 				// If CFC, execute the method
 				if ( isObject( arguments.item ) ) {
 					return invoke( arguments.item, valueID );

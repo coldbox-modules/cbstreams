@@ -10,6 +10,8 @@ component{
 	request.MODULE_NAME = "cbstreams";
 	request.MODULE_PATH = "cbstreams";
 
+	//applicationstop();abort;
+
 	// Application properties
 	this.name              = hash( getCurrentTemplatePath() );
 	this.sessionManagement = true;
@@ -57,6 +59,11 @@ component{
 
 	// request start
 	public boolean function onRequestStart(String targetPage){
+
+		if ( structKeyExists( url, "appstop" ) ) {
+			applicationStop();
+			abort;
+		}
 
 		// Process ColdBox Request
 		application.cbBootstrap.onRequestStart( arguments.targetPage );

@@ -97,7 +97,7 @@ component accessors="true" {
 	void function ifPresent( required consumer ){
 		variables.jOptional.ifPresent(
 			createDynamicProxy(
-				new coldbox.system.async.proxies.Consumer( arguments.consumer ),
+				new proxies.Consumer( arguments.consumer ),
 				[ "java.util.function.Consumer" ]
 			)
 		);

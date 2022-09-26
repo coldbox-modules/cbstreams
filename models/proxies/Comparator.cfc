@@ -24,9 +24,14 @@ component extends="BaseProxy"{
 			lock name='#getConcurrentEngineLockName()#' type="exclusive" timeout="60" {
      			return variables.target( arguments.o1, arguments.o2 );
      		}
-        } finally {
-        	unLoadContext();
-        }
+        }catch ( any e ) {
+			// Log it, so it doesn't go to ether
+			err( "Error running Comparator: #e.message & e.detail#" );
+			err( "Stacktrace for Comparator: #e.stackTrace#" );
+			rethrow;
+		} finally {
+			unLoadContext();
+		}
     }
 
     function comparing(keyExtractor, keyComparator){}

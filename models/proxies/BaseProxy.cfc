@@ -1,15 +1,33 @@
 /**
- * This base proxy class inherits from the core ColdBox Base Proxy so we can tap into
- * each engine's approach to asynchronicity.  This class decorates or adds more tooling
- * so stream threads can have more power.
+ * Functional interface base dynamically compiled via dynamic proxy
  */
-component accessors="true" extends="coldbox.system.async.proxies.BaseProxy" {
+component accessors="true" extends="coldbox.system.async.proxies.BaseProxy"{
 
 	/**
-	 * Check if you are in cfthread or not for any CFML Engine
+	 * Ability to load the context into the running thread
 	 */
+	function loadContext(){
+		// Only load it, if in a streamed thread.
+		if( inStreamThread() ){
+			super.loadContext();
+		} // end if in stream thread
+	}
+
+	/**
+	 * Ability to unload the context out of the running thread
+	 */
+	function unLoadContext(){
+		// Only unload it, if in a streamed thread.
+		if( inStreamThread() ){
+			super.unloadContext();
+		} // end if in stream thread
+	}
+
+	/**
+	* Check if your are using the fork join pool or cfthread.
+	*/
 	boolean function inStreamThread(){
-		return ( findNoCase( "fork", getThreadName() ) NEQ 0 );
+		return ( findNoCase( "ForkJoinPool", getThreadName() ) NEQ 0 );
 	}
 
 }
