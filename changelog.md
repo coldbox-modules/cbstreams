@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Migrated to github actions
 * Migrated to new module template
 
+### Fixed
+
+* `StreamBuilder.new()` had the wrong argument `predicate` when it was `primitive`
+
 ### Changed
 
 * Dropped Adobe 2016

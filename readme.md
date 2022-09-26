@@ -11,7 +11,7 @@ The beauty of streams is that the elements in a stream are processed and passed 
 You can also leverage streams in parallel for parallel execution and take it further with concurrent programming.
 
 ```js
-// Lucee 5 lambdas 
+// Lucee 5 lambdas
 
 streamBuilder.new( [ "d2", "a2", "b1", "b3", "c" ] )
     .map( (s) => {
@@ -127,7 +127,7 @@ This will create a stream of every character in the string sequence.
 
 ### File Streams
 
-We have also added an `ofFile()` method to help you create streams from files using the Java non-blocking IO classes.  The stream will represent every line in the file so you can navigate through it.  
+We have also added an `ofFile()` method to help you create streams from files using the Java non-blocking IO classes.  The stream will represent every line in the file so you can navigate through it.
 
 ```js
 stream = streamBuilder.new().ofFile( absolutePath );
@@ -156,7 +156,7 @@ stream = streamBuilder.new().iterate( 40, function( x ){
 } ).limit( 20 );
 ```
 
-Please note that you can eat up all the memory in the JVM if you don't limit the stream. So make sure you use the `limit()` method to limit the generation, or not :see_no_evil:. 
+Please note that you can eat up all the memory in the JVM if you don't limit the stream. So make sure you use the `limit()` method to limit the generation, or not :see_no_evil:.
 
 ### Ranged Streams
 
@@ -206,7 +206,7 @@ Terminal operations are a way to finalize the execution of the stream.  Please n
 - `findFirst()` - Find the first element in the stream
 - `forEach( action )` - Iterate through all elements and call the action consuming closure or lambda.
 - `forEachOrdered( action )` - Iterate through all elements in order and call the action consuming closure or lambda.
-- `reduce( accumulator, identity )` - (also sometimes called a fold) performs a reduction of the stream to a single element. You want to sum all the integer values in the stream – you want to use the reduce function. You want to find the maximum in the stream – reduce is your friend.  **Important:** Using reduce in a parallel stream is currently not supported and can cause unexpected results as the initial identity value and accumulator need to run sequentially (otherwise they would need to maintain state and streams are stateless). Either use a `map` or run your reducer in a `sequential` stream. 
+- `reduce( accumulator, identity )` - (also sometimes called a fold) performs a reduction of the stream to a single element. You want to sum all the integer values in the stream – you want to use the reduce function. You want to find the maximum in the stream – reduce is your friend.  **Important:** Using reduce in a parallel stream is currently not supported and can cause unexpected results as the initial identity value and accumulator need to run sequentially (otherwise they would need to maintain state and streams are stateless). Either use a `map` or run your reducer in a `sequential` stream.
 - `anyMatch( predicate )` - Returns a boolean that indicates if any elements match the predicate closure/lambda
 - `allMatch( predicate )` - Returns a boolean that indicates if ALL elements matched the predicate closure/lambda
 - `noneMatch( predicate )` - Returns a boolean that indicates if NONE of the elements matched the predicate closure/lambda
@@ -218,12 +218,13 @@ Terminal operations are a way to finalize the execution of the stream.  Please n
 
 Collectors are the way to get out of the streams world and obtain a concrete collection of values, like a list, struct, etc.  Here are our collector methods available to you:
 
-- `collect()` - Return an array of the final elements
+- `collect()` - Return an array of the final elements.
 - `collectGroupingBy( classifier )` - Build a final collection according to the classifier lambda/closure that will classify the keys in the group.  This is usually a structure of elements.
-- `collectAverage( mapper, primitive=long )` - Collect an average according to the mapper function/closure
-- `collectSum( mapper, primitive=long )` - Collect a sum according to the mapper function/closure
-- `collectSummary( mapper, primitive=long )` - Collect a statistics struct according to the mapper function/closure 
+- `collectAverage( mapper, primitive=long )` - Collect an average according to the mapper function/closure.
+- `collectSum( mapper, primitive=long )` - Collect a sum according to the mapper function/closure.
+- `collectSummary( mapper, primitive=long )` - Collect a statistics struct according to the mapper function/closure .
 - `collectAsList( delimiter=",", prefix, suffix )` - Collect results into a string list with a delimiter and attached prefix and/or suffix.
+- `collectAsSet()` - Collect the items to a set which doesn't include duplicate elements.
 - `collectAsStruct( keyID, valueID, overwrite=true )` - Collect the elements into a struct by leveraging the key identifier and the value identifier from the stream of elements to pass into the collection.
 - `collectPartitioningBy( predicate )` - partitions the input elements according to a Predicate closure/lambda, and organizes them into a Struct of <Boolean, array >.
 
@@ -337,7 +338,7 @@ streamBuilder.new( myArray )
 // "DDD2", "DDD1", "CCC", "BBB3", "BBB2", "AAA2", "AAA1"
 
 // Matching
-anyStartsWithA = 
+anyStartsWithA =
     streamBuilder
         .new( myArray )
         .anyMatch( function( item ){
@@ -394,21 +395,31 @@ count =
         .parallel()
         .sorted()
         .count();
+
+// Collect the items into a set that contains NO duplicates
+set =
+    streamBuilder
+        .new( [ "aa", "aa", "bb", "ab", "dd", "ab" ] )
+        .sorted()
+        .collectAsSet();
 ```
 
 ********************************************************************************
 Copyright Since 2005 ColdBox Framework by Luis Majano and Ortus Solutions, Corp
 www.ortussolutions.com
 ********************************************************************************
-#### HONOR GOES TO GOD ABOVE ALL
+
+### HONOR GOES TO GOD ABOVE ALL
+
 Because of His grace, this project exists. If you don't like this, then don't read it, its not for you.
 
 >"Therefore being justified by faith, we have peace with God through our Lord Jesus Christ:
 By whom also we have access by faith into this grace wherein we stand, and rejoice in hope of the glory of God.
 And not only so, but we glory in tribulations also: knowing that tribulation worketh patience;
 And patience, experience; and experience, hope:
-And hope maketh not ashamed; because the love of God is shed abroad in our hearts by the 
+And hope maketh not ashamed; because the love of God is shed abroad in our hearts by the
 Holy Ghost which is given unto us. ." Romans 5:5
 
 ### THE DAILY BREAD
+
  > "I am the way, and the truth, and the life; no one comes to the Father, but by me (JESUS)" Jn 14:1-12
