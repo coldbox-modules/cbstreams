@@ -18,12 +18,12 @@ component singleton {
 	 *
 	 * @collection This is an optional collection to build a stream on: List, Array, Struct, Query
 	 * @isNumeric  This is a shorthand for doing a numeric typed array of values. This will choose a long stream for you by default.
-	 * @predicate  If you will be doing operations on the stream, you can mark it with a predicate type of: int, long or double. Else we will use generic object streams
+	 * @primitive  If you will be doing operations on the stream, you can mark it with a primitive type of: int, long or double. Else we will use generic object streams
 	 */
 	Stream function new(
 		any collection = "",
 		isNumeric      = false,
-		predicate      = ""
+		primitive      = ""
 	){
 		return new Stream( argumentCollection = arguments );
 	}
