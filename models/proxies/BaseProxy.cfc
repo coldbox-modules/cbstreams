@@ -8,7 +8,7 @@ component accessors="true" extends="coldbox.system.async.proxies.BaseProxy"{
 	 */
 	function loadContext(){
 		// Only load it, if in a streamed thread.
-		if( inStreamThread() ){
+		if( inForkJoinPool() ){
 			super.loadContext();
 		} // end if in stream thread
 	}
@@ -18,7 +18,7 @@ component accessors="true" extends="coldbox.system.async.proxies.BaseProxy"{
 	 */
 	function unLoadContext(){
 		// Only unload it, if in a streamed thread.
-		if( inStreamThread() ){
+		if( inForkJoinPool() ){
 			super.unloadContext();
 		} // end if in stream thread
 	}
@@ -26,7 +26,7 @@ component accessors="true" extends="coldbox.system.async.proxies.BaseProxy"{
 	/**
 	* Check if your are using the fork join pool or cfthread.
 	*/
-	boolean function inStreamThread(){
+	boolean function inForkJoinPool(){
 		return ( findNoCase( "ForkJoinPool", getThreadName() ) NEQ 0 );
 	}
 
