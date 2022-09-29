@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ----
 
+## [2.0.1] => 2022-SEP-29
+
+### Fixed
+
+* Use the release of `cbproxies` instead of the snapshot
+
+----
+
 ## [2.0.0] => 2022-SEP-29
 
 ### New Features
