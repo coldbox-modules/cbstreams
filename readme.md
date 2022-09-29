@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/coldbox-modules/cbstreams.svg?branch=development)](https://travis-ci.org/coldbox-modules/cbstreams)
+
 # CB Streams
 
 Welcome to the wonderful world of Java Streams ported for the CFML world!
@@ -9,9 +11,7 @@ The beauty of streams is that the elements in a stream are processed and passed 
 You can also leverage streams in parallel for parallel execution and take it further with concurrent programming.
 
 ```js
-// Lucee 5 lambdas 
-
-streamBuilder.new( [ "d2", "a2", "b1", "b3", "c" ] )
+stream( [ "d2", "a2", "b1", "b3", "c" ] )
     .map( (s) => {
         writedump( "map: " & s );
         return s.ucase();
@@ -51,7 +51,7 @@ You're now ready to leverage streams!
 
 ## In-Depth Tutorial
 
-These tutorials on Java Streams are fantastic. We encourage you to read them to see the power of streams. You can also find the `cbstreams` API Docs to be a great source of information: [http://apidocs.ortussolutions.com/#/coldbox-modules/cbstreams](http://apidocs.ortussolutions.com/#/coldbox-modules/cbstreams)
+These tutorials on Java Streams are fantastic. We encourage you to read them to see the power of streams. You can also find the `cbstreams` API Docs to be a great source of information: [https://apidocs.ortussolutions.com/coldbox-modules/cbstreams/current/index.html](https://apidocs.ortussolutions.com/coldbox-modules/cbstreams/current/index.html)
 
 - [Streams Cheatsheet](http://files.zeroturnaround.com/pdf/zt_java8_streams_cheat_sheet.pdf)
 - [Java Streams Examples](http://winterbe.com/posts/2014/07/31/java8-stream-tutorial-examples/)
@@ -61,12 +61,12 @@ These tutorials on Java Streams are fantastic. We encourage you to read them to 
 
 ## Usage
 
-In order to start working with streams you must leverage WireBox and inject `StreamBuilder@cbstreams`.  This factory has two methods for your streaming pleasure:
+In order to start working with streams you must leverage WireBox and inject `StreamBuilder@cbstreams` or use the ColdBox Helper methods avaialable in all handlers, interceptors, layouts/views: `stream(), streamBuilder()`.  If you inject the `StreamBuilder` directly then you can call it's methods directly:
 
 - `new( any collection="", isNumeric=false, primitive=""  )` - Returns a new `Stream.cfc` according to passed arguments
-- `builder()` - Returns a Stream Builder that maps to the `Builder.cfc` so you can build a stream manually.
+- `builder()` - Returns a Stream Builder that maps to the `cbstreams.models.Builder.cfc` so you can build a stream manually.
 
-We encourage you to learn our [API Docs](http://apidocs.ortussolutions.com/#/coldbox-modules/cbstreams) to see how to interact with streams.  We try our best to map static Java types to loose typed ColdFusion types. If you find anything that doesn't work, please create issues here: [Issues](https://github.com/coldbox-modules/cbstreams/issues)
+We encourage you to learn our [API Docs](https://apidocs.ortussolutions.com/coldbox-modules/cbstreams/current/index.html) to see how to interact with streams.  We try our best to map static Java types to loose typed ColdFusion types. If you find anything that doesn't work, please create issues here: [Issues](https://github.com/coldbox-modules/cbstreams/issues)
 
 ## Creating Streams
 
@@ -87,6 +87,11 @@ You can also pass **nothing** and create an empty stream.
 You can generate empty streams by just calling on the `new()` method or using the `empty()` method in the Stream class.
 
 ```js
+// Helpers
+emptyStream = stream();
+emptyStream = stream().empty();
+
+// Injection
 emptyStream = streamBuilder.new();
 emptyStream = streamBuilder.new().empty();
 ```
@@ -96,11 +101,20 @@ emptyStream = streamBuilder.new().empty();
 You can build your own stream with your own data by using our Stream Builder. Just get access to the builder and add your data with the `add()` method.
 
 ```js
+// Helpers
+builder = streamBuilder();
+myData.each( function( item ){
+    builder.add( item );
+} );
+myStream = builder.build();
+
+// Injection
 builder = streamBuilder.builder();
 myData.each( function( item ){
     builder.add( item );
 } );
 myStream = builder.build();
+
 ```
 
 Make sure you call the `build()` method on the builder to give you an instance of the Stream CFC.
@@ -110,6 +124,7 @@ Make sure you call the `build()` method on the builder to give you an instance o
 You can leverage the `of()` method to pass in arguments to build a stream out of all the arguments passed to it:
 
 ```js
+stream = stream().of( "a", "hello", "stream" );
 stream = streamBuilder.new().of( "a", "hello", "stream" );
 ```
 
@@ -118,6 +133,7 @@ stream = streamBuilder.new().of( "a", "hello", "stream" );
 You can leverage the `ofChars()` method to create a character stream from an existing string.
 
 ```js
+stream = stream().ofChars( "Welcome to Streams" );
 stream = streamBuilder.new().ofChars( "Welcome to Streams" );
 ```
 
@@ -125,9 +141,10 @@ This will create a stream of every character in the string sequence.
 
 ### File Streams
 
-We have also added an `ofFile()` method to help you create streams from files using the Java non-blocking IO classes.  The stream will represent every line in the file so you can navigate through it.  
+We have also added an `ofFile()` method to help you create streams from files using the Java non-blocking IO classes.  The stream will represent every line in the file so you can navigate through it.
 
 ```js
+stream = stream().ofFile( absolutePath );
 stream = streamBuilder.new().ofFile( absolutePath );
 try{
     work on the stream and close it in the finally block;
@@ -154,7 +171,7 @@ stream = streamBuilder.new().iterate( 40, function( x ){
 } ).limit( 20 );
 ```
 
-Please note that you can eat up all the memory in the JVM if you don't limit the stream. So make sure you use the `limit()` method to limit the generation, or not :see_no_evil:. 
+Please note that you can eat up all the memory in the JVM if you don't limit the stream. So make sure you use the `limit()` method to limit the generation, or not :see_no_evil:.
 
 ### Ranged Streams
 
@@ -171,6 +188,7 @@ stream = streamBuilder.new().rangeClosed( 1, 2030 );
 By default all streams are generated as sequential streams.  You can also mark a stream to leverage parallel programming by calling on the `parallel()` method.  You can also convert it back to sequential by using the `sequential()` method.
 
 ```js
+stream = stream().range(1, 200 ).parallel();
 stream = streamBuilder.new().range(1, 200 ).parallel();
 ```
 
@@ -204,7 +222,7 @@ Terminal operations are a way to finalize the execution of the stream.  Please n
 - `findFirst()` - Find the first element in the stream
 - `forEach( action )` - Iterate through all elements and call the action consuming closure or lambda.
 - `forEachOrdered( action )` - Iterate through all elements in order and call the action consuming closure or lambda.
-- `reduce( accumulator, identity )` - (also sometimes called a fold) performs a reduction of the stream to a single element. You want to sum all the integer values in the stream – you want to use the reduce function. You want to find the maximum in the stream – reduce is your friend.  **Important:** Using reduce in a parallel stream is currently not supported and can cause unexpected results as the initial identity value and accumulator need to run sequentially (otherwise they would need to maintain state and streams are stateless). Either use a `map` or run your reducer in a `sequential` stream. 
+- `reduce( accumulator, identity )` - (also sometimes called a fold) performs a reduction of the stream to a single element. You want to sum all the integer values in the stream – you want to use the reduce function. You want to find the maximum in the stream – reduce is your friend.  **Important:** Using reduce in a parallel stream is currently not supported and can cause unexpected results as the initial identity value and accumulator need to run sequentially (otherwise they would need to maintain state and streams are stateless). Either use a `map` or run your reducer in a `sequential` stream.
 - `anyMatch( predicate )` - Returns a boolean that indicates if any elements match the predicate closure/lambda
 - `allMatch( predicate )` - Returns a boolean that indicates if ALL elements matched the predicate closure/lambda
 - `noneMatch( predicate )` - Returns a boolean that indicates if NONE of the elements matched the predicate closure/lambda
@@ -216,12 +234,13 @@ Terminal operations are a way to finalize the execution of the stream.  Please n
 
 Collectors are the way to get out of the streams world and obtain a concrete collection of values, like a list, struct, etc.  Here are our collector methods available to you:
 
-- `collect()` - Return an array of the final elements
+- `collect()` - Return an array of the final elements.
 - `collectGroupingBy( classifier )` - Build a final collection according to the classifier lambda/closure that will classify the keys in the group.  This is usually a structure of elements.
-- `collectAverage( mapper, primitive=long )` - Collect an average according to the mapper function/closure
-- `collectSum( mapper, primitive=long )` - Collect a sum according to the mapper function/closure
-- `collectSummary( mapper, primitive=long )` - Collect a statistics struct according to the mapper function/closure 
+- `collectAverage( mapper, primitive=long )` - Collect an average according to the mapper function/closure.
+- `collectSum( mapper, primitive=long )` - Collect a sum according to the mapper function/closure.
+- `collectSummary( mapper, primitive=long )` - Collect a statistics struct according to the mapper function/closure .
 - `collectAsList( delimiter=",", prefix, suffix )` - Collect results into a string list with a delimiter and attached prefix and/or suffix.
+- `collectAsSet()` - Collect the items to a set which doesn't include duplicate elements.
 - `collectAsStruct( keyID, valueID, overwrite=true )` - Collect the elements into a struct by leveraging the key identifier and the value identifier from the stream of elements to pass into the collection.
 - `collectPartitioningBy( predicate )` - partitions the input elements according to a Predicate closure/lambda, and organizes them into a Struct of <Boolean, array >.
 
@@ -335,7 +354,7 @@ streamBuilder.new( myArray )
 // "DDD2", "DDD1", "CCC", "BBB3", "BBB2", "AAA2", "AAA1"
 
 // Matching
-anyStartsWithA = 
+anyStartsWithA =
     streamBuilder
         .new( myArray )
         .anyMatch( function( item ){
@@ -392,21 +411,31 @@ count =
         .parallel()
         .sorted()
         .count();
+
+// Collect the items into a set that contains NO duplicates
+set =
+    streamBuilder
+        .new( [ "aa", "aa", "bb", "ab", "dd", "ab" ] )
+        .sorted()
+        .collectAsSet();
 ```
 
 ********************************************************************************
 Copyright Since 2005 ColdBox Framework by Luis Majano and Ortus Solutions, Corp
 www.ortussolutions.com
 ********************************************************************************
-#### HONOR GOES TO GOD ABOVE ALL
+
+### HONOR GOES TO GOD ABOVE ALL
+
 Because of His grace, this project exists. If you don't like this, then don't read it, its not for you.
 
 >"Therefore being justified by faith, we have peace with God through our Lord Jesus Christ:
 By whom also we have access by faith into this grace wherein we stand, and rejoice in hope of the glory of God.
 And not only so, but we glory in tribulations also: knowing that tribulation worketh patience;
 And patience, experience; and experience, hope:
-And hope maketh not ashamed; because the love of God is shed abroad in our hearts by the 
+And hope maketh not ashamed; because the love of God is shed abroad in our hearts by the
 Holy Ghost which is given unto us. ." Romans 5:5
 
 ### THE DAILY BREAD
+
  > "I am the way, and the truth, and the life; no one comes to the Father, but by me (JESUS)" Jn 14:1-12

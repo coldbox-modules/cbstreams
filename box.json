@@ -1,6 +1,6 @@
 {
     "name":"CBStreams",
-    "version":"1.5.0",
+    "version":"2.0.0",
     "location":"https://downloads.ortussolutions.com/ortussolutions/coldbox-modules/cbstreams/@build.version@/cbstreams-@build.version@.zip",
     "author":"Ortus Solutions, Corp",
     "homepage":"https://github.com/ortus-solutions/cbstreams",
@@ -21,19 +21,37 @@
         }
     ],
     "contributors":[],
-    "dependencies":{},
+    "dependencies":{
+        "cbproxies":"^1.0.0-snapshot"
+    },
     "devDependencies":{
-        "testbox":"^2.6.0"
+        "commandbox-cfformat":"*",
+        "commandbox-docbox":"*",
+        "commandbox-dotenv":"*",
+        "commandbox-cfconfig":"*"
     },
     "installPaths":{
-        "testbox":"testbox/"
+        "cbproxies":"modules/cbproxies/"
     },
     "ignore":[
         "**/.*",
+        "build/**",
         "test-harness",
-        "*/.md"
+        "/server*.json"
     ],
+    "testbox":{
+        "runner":"http://localhost:60299/tests/runner.cfm"
+    },
     "scripts":{
-        "toMaster":"recipe build/toMaster.boxr"
+        "build:module":"task run taskFile=build/Build.cfc :projectName=`package show slug` :version=`package show version`",
+        "build:docs":"task run taskFile=build/Build.cfc target=docs :projectName=`package show slug` :version=`package show version`",
+        "release":"recipe build/release.boxr",
+        "format":"cfformat run ModuleConfig.cfc,models/,test-harness/tests/**/*.cfc ./.cfformat.json --overwrite",
+        "format:watch":"cfformat watch ModuleConfig.cfc,models/,test-harness/tests/**/*.cfc ./.cfformat.json",
+        "format:check":"cfformat check ModuleConfig.cfc,models/,test-harness/tests/**/*.cfc ./.cfformat.json",
+        "cfpm":"echo '\".engine/adobe2021/WEB-INF/cfusion/bin/cfpm.sh\"' | run",
+        "cfpm:install":"echo '\".engine/adobe2021/WEB-INF/cfusion/bin/cfpm.sh\" install ${1}' | run",
+        "install:2021":"run-script cfpm:install zip,debugger",
+        "install:dependencies":"install && cd test-harness && install"
     }
 }

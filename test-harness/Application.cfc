@@ -8,13 +8,16 @@ component{
 
 	// UPDATE THE NAME OF THE MODULE IN TESTING BELOW
 	request.MODULE_NAME = "cbstreams";
-	
+	request.MODULE_PATH = "cbstreams";
+
+	//applicationstop();abort;
+
 	// Application properties
 	this.name              = hash( getCurrentTemplatePath() );
 	this.sessionManagement = true;
 	this.sessionTimeout    = createTimeSpan(0,0,15,0);
     this.setClientCookies  = true;
-    
+
     /**************************************
 	LUCEE Specific Settings
 	**************************************/
@@ -46,7 +49,7 @@ component{
 	// Module Root + Path Mappings
 	this.mappings[ "/moduleroot" ] = moduleRootPath;
 	this.mappings[ "/#request.MODULE_NAME#" ] = modulePath;
-	
+
 	// application start
 	public boolean function onApplicationStart(){
 		application.cbBootstrap = new coldbox.system.Bootstrap( COLDBOX_CONFIG_FILE, COLDBOX_APP_ROOT_PATH, COLDBOX_APP_KEY, COLDBOX_APP_MAPPING );
@@ -56,6 +59,11 @@ component{
 
 	// request start
 	public boolean function onRequestStart(String targetPage){
+
+		if ( structKeyExists( url, "appstop" ) ) {
+			applicationStop();
+			abort;
+		}
 
 		// Process ColdBox Request
 		application.cbBootstrap.onRequestStart( arguments.targetPage );

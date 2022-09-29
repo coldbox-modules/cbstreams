@@ -1,11 +1,42 @@
 # Changelog
 
-## v1.5.0
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+----
+
+## [2.0.0] => 2022-SEP-29
+
+### New Features
+
+* New ColdBox helpers: `stream(), streamBuilder()`
+* Migration to leverage `cbproxies` instead of duplicating work. This allows us to use `parallel()` finally with no issues on all engines.
+* Added `collectAsSet()` to collect items into a non-duplicate set instance
+* Added mappings for API Docs
+* Added more experimental Adobe/Lucee CFML Context loading for parallel streams
+* Migrated to github actions
+* Migrated to new module template
+
+### Fixed
+
+* `StreamBuilder.new()` had the wrong argument `predicate` when it was `primitive`
+
+### Changed
+
+* Dropped Adobe 2016
+
+----
+
+## [1.5.0] => 2019-JUL-02
 
 * Added ACF support for `java.util.ArrayList` native arrays to be casted correctly to Java Streams.
 * Experimental: Added the ability to transfer page contexts and fusion contexts for running parallel threads. This is a major breakthrough for parallelization of the fork join framework and bridging to the CFML engines. Only works on ACF, and partially.
 
-## v1.4.0
+----
+
+## [1.4.0]
 
 * Ability to add a file encoding when doing file streams via `ofFile( path, encoding = "UTF-8" )` with UTF-8 being the default.
 * The `Optional` class gets several new methods:
@@ -15,23 +46,30 @@
   * `$or( supplier ), or( supplier )` - If a value is present, returns an Optional describing the value, otherwise returns an Optional produced by the supplying function value.
   * `orElseThrow( type, message )` - If a value is present, returns the value, otherwise throws NoSuchElementException.
 
+----
 
-## v1.3.0
+## [1.3.0]
 
 * Native ColdFusion Query Support
 * Native Java arrays support when passing native java arrays to build streams out of them
 
-## v1.2.1
+----
+
+## [1.2.1]
 
 * Fixes on `map()` when using ranges to switch the types to `any`
 
-## v1.2.0
+----
+
+## [1.2.0]
 
 * Fix the `generate()` to use the correct stream class. Only works on lucee, adobe fails on interface default method executions.
 * Removed the `iterate()` not working with dynamic proxies
 * Rework of ranges in order to work with strong typed streams
 
-## v1.1.0
+----
+
+## [1.1.0]
 
 * Added Adobe 2018 Build process
 * Updated keyserver for build process
@@ -40,6 +78,8 @@
 * CFConfig additions for further testing
 * Fixes to interfaces for ACF Compat
 
-## v1.0.0
+----
+
+## [1.0.0]
 
 * First iteration of this module

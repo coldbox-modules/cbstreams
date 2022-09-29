@@ -14,6 +14,8 @@ component {
 	// CF Mapping
 	this.cfmapping			= "cbstreams";
 	this.modelNamespace 	= "cbstreams";
+	// Helpers
+	this.applicationHelper = [ "helpers/Mixins.cfm" ];
 	// Module Dependencies That Must Be Loaded First, use internal names or aliases
 	this.dependencies		= [];
 
