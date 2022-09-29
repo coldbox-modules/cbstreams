@@ -188,7 +188,7 @@ component accessors="true" {
 	Stream function generate( required supplier ){
 		variables.jStream = variables.coreStream.generate(
 			createDynamicProxy(
-				new proxies.Supplier( arguments.supplier ),
+				new cbproxies.models.Supplier( arguments.supplier ),
 				[ "java.util.function.Supplier" ]
 			)
 		);
@@ -293,7 +293,7 @@ component accessors="true" {
 			variables.jStream = variables.jStream.sorted();
 		} else {
 			variables.jStream = variables.jStream.sorted(
-				createDynamicProxy( new proxies.Comparator( arguments.comparator ), [ "java.util.Comparator" ] )
+				createDynamicProxy( new cbproxies.models.Comparator( arguments.comparator ), [ "java.util.Comparator" ] )
 			);
 		}
 		return this;
@@ -308,7 +308,7 @@ component accessors="true" {
 		if ( isStrongTyped() ) {
 			variables.jStream = variables.jStream.mapToObj(
 				createDynamicProxy(
-					new proxies.Function( arguments.mapper ),
+					new cbproxies.models.Function( arguments.mapper ),
 					[ "java.util.function.#getStrongTypePrefix()#Function" ]
 				)
 			);
@@ -316,7 +316,7 @@ component accessors="true" {
 		} else {
 			variables.jStream = variables.jStream.map(
 				createDynamicProxy(
-					new proxies.Function( arguments.mapper ),
+					new cbproxies.models.Function( arguments.mapper ),
 					[ "java.util.function.Function" ]
 				)
 			);
@@ -336,14 +336,14 @@ component accessors="true" {
 		if ( isStrongTyped() ) {
 			variables.jStream = variables.jStream.filter(
 				createDynamicProxy(
-					new proxies.Predicate( arguments.predicate ),
+					new cbproxies.models.Predicate( arguments.predicate ),
 					[ "java.util.function.#getStrongTypePrefix()#Predicate" ]
 				)
 			);
 		} else {
 			variables.jStream = variables.jStream.filter(
 				createDynamicProxy(
-					new proxies.Predicate( arguments.predicate ),
+					new cbproxies.models.Predicate( arguments.predicate ),
 					[ "java.util.function.Predicate" ]
 				)
 			);
@@ -395,7 +395,7 @@ component accessors="true" {
 	Stream function onClose( required closeHandler ){
 		variables.jStream = variables.jStream.onClose(
 			createDynamicProxy(
-				new proxies.Runnable( arguments.closeHandler ),
+				new cbproxies.models.Runnable( arguments.closeHandler ),
 				[ "java.lang.Runnable" ]
 			)
 		);
@@ -443,14 +443,14 @@ component accessors="true" {
 		if ( isStrongTyped() ) {
 			variables.jStream = variables.jStream.peek(
 				createDynamicProxy(
-					new proxies.Consumer( arguments.action ),
+					new cbproxies.models.Consumer( arguments.action ),
 					[ "java.util.function.#getStrongTypePrefix()#Consumer" ]
 				)
 			);
 		} else {
 			variables.jStream = variables.jStream.peek(
 				createDynamicProxy(
-					new proxies.Consumer( arguments.action ),
+					new cbproxies.models.Consumer( arguments.action ),
 					[ "java.util.function.Consumer" ]
 				)
 			);
@@ -522,7 +522,7 @@ component accessors="true" {
 	 * @return an Optional describing some element of this stream, or an empty Optional if the stream is empty
 	 */
 	Optional function findAny(){
-		return new Optional( variables.jStream.findAny() );
+		return new cbproxies.models.Optional( variables.jStream.findAny() );
 	}
 
 	/**
@@ -533,7 +533,7 @@ component accessors="true" {
 	 * @return an Optional describing the first element of this stream, or an empty Optional if the stream is empty. If the stream has no encounter order, then any element may be returned.
 	 */
 	Optional function findFirst(){
-		return new Optional( variables.jStream.findFirst() );
+		return new cbproxies.models.Optional( variables.jStream.findFirst() );
 	}
 
 	/**
@@ -549,14 +549,14 @@ component accessors="true" {
 		if ( isStrongTyped() ) {
 			variables.jStream.forEach(
 				createDynamicProxy(
-					new proxies.Consumer( arguments.action ),
+					new cbproxies.models.Consumer( arguments.action ),
 					[ "java.util.function.#getStrongTypePrefix()#Consumer" ]
 				)
 			);
 		} else {
 			variables.jStream.forEach(
 				createDynamicProxy(
-					new proxies.Consumer( arguments.action ),
+					new cbproxies.models.Consumer( arguments.action ),
 					[ "java.util.function.Consumer" ]
 				)
 			);
@@ -576,14 +576,14 @@ component accessors="true" {
 		if ( isStrongTyped() ) {
 			variables.jStream.forEachOrdered(
 				createDynamicProxy(
-					new proxies.Consumer( arguments.action ),
+					new cbproxies.models.Consumer( arguments.action ),
 					[ "java.util.function.#getStrongTypePrefix()#Consumer" ]
 				)
 			);
 		} else {
 			variables.jStream.forEachOrdered(
 				createDynamicProxy(
-					new proxies.Consumer( arguments.action ),
+					new cbproxies.models.Consumer( arguments.action ),
 					[ "java.util.function.Consumer" ]
 				)
 			);
@@ -605,24 +605,24 @@ component accessors="true" {
 	function reduce( required accumulator, identity ){
 		if ( isStrongTyped() ) {
 			var proxy = createDynamicProxy(
-				new proxies.BinaryOperator( arguments.accumulator ),
+				new cbproxies.models.BinaryOperator( arguments.accumulator ),
 				[ "java.util.function.#getStrongTypePrefix()#BinaryOperator" ]
 			);
 		} else {
 			var proxy = createDynamicProxy(
-				new proxies.BinaryOperator( arguments.accumulator ),
+				new cbproxies.models.BinaryOperator( arguments.accumulator ),
 				[ "java.util.function.BinaryOperator" ]
 			);
 		}
 
 		// Accumulator Only
 		if ( isNull( arguments.identity ) ) {
-			return new Optional( variables.jStream.reduce( proxy ) );
+			return new cbproxies.models.Optional( variables.jStream.reduce( proxy ) );
 		}
 		// Accumulator + Identity Seed
 		else {
 			var results = variables.jStream.reduce( arguments.identity, proxy );
-			return new Optional().getNativeType( results );
+			return new cbproxies.models.Optional().getNativeType( results );
 		}
 	}
 
@@ -639,14 +639,14 @@ component accessors="true" {
 		if ( isStrongTyped() ) {
 			return variables.jStream.anyMatch(
 				createDynamicProxy(
-					new proxies.Predicate( arguments.predicate ),
+					new cbproxies.models.Predicate( arguments.predicate ),
 					[ "java.util.function.#getStrongTypePrefix()#Predicate" ]
 				)
 			);
 		} else {
 			return variables.jStream.anyMatch(
 				createDynamicProxy(
-					new proxies.Predicate( arguments.predicate ),
+					new cbproxies.models.Predicate( arguments.predicate ),
 					[ "java.util.function.Predicate" ]
 				)
 			);
@@ -666,14 +666,14 @@ component accessors="true" {
 		if ( isStrongTyped() ) {
 			return variables.jStream.allMatch(
 				createDynamicProxy(
-					new proxies.Predicate( arguments.predicate ),
+					new cbproxies.models.Predicate( arguments.predicate ),
 					[ "java.util.function.#getStrongTypePrefix()#Predicate" ]
 				)
 			);
 		} else {
 			return variables.jStream.allMatch(
 				createDynamicProxy(
-					new proxies.Predicate( arguments.predicate ),
+					new cbproxies.models.Predicate( arguments.predicate ),
 					[ "java.util.function.Predicate" ]
 				)
 			);
@@ -693,14 +693,14 @@ component accessors="true" {
 		if ( isStrongTyped() ) {
 			return variables.jStream.noneMatch(
 				createDynamicProxy(
-					new proxies.Predicate( arguments.predicate ),
+					new cbproxies.models.Predicate( arguments.predicate ),
 					[ "java.util.function.#getStrongTypePrefix()#Predicate" ]
 				)
 			);
 		} else {
 			return variables.jStream.noneMatch(
 				createDynamicProxy(
-					new proxies.Predicate( arguments.predicate ),
+					new cbproxies.models.Predicate( arguments.predicate ),
 					[ "java.util.function.Predicate" ]
 				)
 			);
@@ -720,13 +720,13 @@ component accessors="true" {
 	 */
 	Optional function max( comparator ){
 		if ( isNull( arguments.comparator ) ) {
-			return new Optional( variables.jStream.max() );
+			return new cbproxies.models.Optional( variables.jStream.max() );
 		} else {
 			var oProxy = createDynamicProxy(
-				new proxies.Comparator( arguments.comparator ),
+				new cbproxies.models.Comparator( arguments.comparator ),
 				[ "java.util.Comparator" ]
 			);
-			return new Optional( variables.jStream.max( oProxy ) );
+			return new cbproxies.models.Optional( variables.jStream.max( oProxy ) );
 		}
 	}
 
@@ -743,13 +743,13 @@ component accessors="true" {
 	 */
 	Optional function min( comparator ){
 		if ( isNull( arguments.comparator ) ) {
-			return new Optional( variables.jStream.min() );
+			return new cbproxies.models.Optional( variables.jStream.min() );
 		} else {
 			var oProxy = createDynamicProxy(
-				new proxies.Comparator( arguments.comparator ),
+				new cbproxies.models.Comparator( arguments.comparator ),
 				[ "java.util.Comparator" ]
 			);
-			return new Optional( variables.jStream.min( oProxy ) );
+			return new cbproxies.models.Optional( variables.jStream.min( oProxy ) );
 		}
 	}
 
@@ -760,7 +760,7 @@ component accessors="true" {
 	 * This is a terminal operation.
 	 */
 	Optional function average(){
-		return new Optional( variables.jStream.average() );
+		return new cbproxies.models.Optional( variables.jStream.average() );
 	}
 
 	/**
@@ -797,7 +797,7 @@ component accessors="true" {
 		return variables.jStream.collect(
 			variables.Collectors.groupingBy(
 				createDynamicProxy(
-					new proxies.Function( arguments.classifier ),
+					new cbproxies.models.Function( arguments.classifier ),
 					[ "java.util.function.Function" ]
 				)
 			)
@@ -938,7 +938,7 @@ component accessors="true" {
 		}
 
 		var keyFunction = createDynamicProxy(
-			new proxies.Function( function( item ){
+			new cbproxies.models.Function( function( item ){
 				// If CFC, execute the method
 				if ( isObject( arguments.item ) ) {
 					return invoke( arguments.item, keyID );
@@ -954,7 +954,7 @@ component accessors="true" {
 		);
 
 		var valueFunction = createDynamicProxy(
-			new proxies.Function( function( item ){
+			new cbproxies.models.Function( function( item ){
 				// If CFC, execute the method
 				if ( isObject( arguments.item ) ) {
 					return invoke( arguments.item, valueID );
@@ -970,7 +970,7 @@ component accessors="true" {
 		);
 
 		var overrideFunction = createDynamicProxy(
-			new proxies.BinaryOperator( function( oldValue, newValue ){
+			new cbproxies.models.BinaryOperator( function( oldValue, newValue ){
 				return ( overwrite ? newValue : oldValue );
 			} ),
 			[ "java.util.function.BinaryOperator" ]
@@ -990,7 +990,7 @@ component accessors="true" {
 		return variables.jStream.collect(
 			variables.Collectors.partitioningBy(
 				createDynamicProxy(
-					new proxies.Predicate( arguments.predicate ),
+					new cbproxies.models.Predicate( arguments.predicate ),
 					[ "java.util.function.Predicate" ]
 				)
 			)
@@ -1009,19 +1009,19 @@ component accessors="true" {
 		switch ( arguments.primitive ) {
 			case "int": {
 				return createDynamicProxy(
-					new proxies.ToIntFunction( arguments.f ),
+					new cbproxies.models.ToIntFunction( arguments.f ),
 					[ "java.util.function.ToIntFunction" ]
 				);
 			}
 			case "double": {
 				return createDynamicProxy(
-					new proxies.ToDoubleFunction( arguments.f ),
+					new cbproxies.models.ToDoubleFunction( arguments.f ),
 					[ "java.util.function.ToDoubleFunction" ]
 				);
 			}
 			default: {
 				return createDynamicProxy(
-					new proxies.ToLongFunction( arguments.f ),
+					new cbproxies.models.ToLongFunction( arguments.f ),
 					[ "java.util.function.ToLongFunction" ]
 				);
 			}

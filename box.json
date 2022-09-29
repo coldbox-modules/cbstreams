@@ -21,7 +21,9 @@
         }
     ],
     "contributors":[],
-    "dependencies":{},
+    "dependencies":{
+        "cbproxies":"^1.0.0-snapshot"
+    },
     "devDependencies":{
         "commandbox-cfformat":"*",
         "commandbox-docbox":"*",
@@ -29,6 +31,7 @@
         "commandbox-cfconfig":"*"
     },
     "installPaths":{
+        "cbproxies":"modules/cbproxies/"
     },
     "ignore":[
         "**/.*",
@@ -36,7 +39,7 @@
         "test-harness",
         "/server*.json"
     ],
-	"testbox":{
+    "testbox":{
         "runner":"http://localhost:60299/tests/runner.cfm"
     },
     "scripts":{
@@ -46,7 +49,7 @@
         "format":"cfformat run ModuleConfig.cfc,models/,test-harness/tests/**/*.cfc ./.cfformat.json --overwrite",
         "format:watch":"cfformat watch ModuleConfig.cfc,models/,test-harness/tests/**/*.cfc ./.cfformat.json",
         "format:check":"cfformat check ModuleConfig.cfc,models/,test-harness/tests/**/*.cfc ./.cfformat.json",
-		"cfpm":"echo '\".engine/adobe2021/WEB-INF/cfusion/bin/cfpm.sh\"' | run",
+        "cfpm":"echo '\".engine/adobe2021/WEB-INF/cfusion/bin/cfpm.sh\"' | run",
         "cfpm:install":"echo '\".engine/adobe2021/WEB-INF/cfusion/bin/cfpm.sh\" install ${1}' | run",
         "install:2021":"run-script cfpm:install zip,debugger",
         "install:dependencies":"install && cd test-harness && install"
