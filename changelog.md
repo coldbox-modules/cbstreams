@@ -7,12 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ----
 
-## [2.0.0] => 2022-SEP-
+## [2.0.0] => 2022-SEP-29
 
 ### New Features
 
 * New ColdBox helpers: `stream(), streamBuilder()`
-* Migration to leverage the ColdBox core classes instead of duplicating work. This allows us to use parallel() finally with no issues on all engines.
+* Migration to leverage `cbproxies` instead of duplicating work. This allows us to use `parallel()` finally with no issues on all engines.
 * Added `collectAsSet()` to collect items into a non-duplicate set instance
 * Added mappings for API Docs
 * Added more experimental Adobe/Lucee CFML Context loading for parallel streams
