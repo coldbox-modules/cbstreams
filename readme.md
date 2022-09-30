@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/coldbox-modules/cbstreams.svg?branch=development)](https://travis-ci.org/coldbox-modules/cbstreams)
+[![cbstreams CI](https://github.com/coldbox-modules/cbstreams/actions/workflows/ci.yml/badge.svg)](https://github.com/coldbox-modules/cbstreams/actions/workflows/ci.yml)
 
 # CB Streams
 

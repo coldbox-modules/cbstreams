@@ -5,14 +5,16 @@
     "private":true,
     "description":"",
     "dependencies":{
-        "coldbox":"^6.0.0"
+        "coldbox":"^6.0.0",
+        "cbproxies":"^1.0.0"
     },
     "devDependencies":{
         "testbox":"*"
     },
     "installPaths":{
         "coldbox":"coldbox/",
-        "testbox":"testbox/"
+        "testbox":"testbox/",
+        "cbproxies":"modules/cbproxies/"
     },
     "testbox":{
         "runner":"http://localhost:60299/tests/runner.cfm"
