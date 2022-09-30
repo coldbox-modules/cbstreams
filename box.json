@@ -1,6 +1,6 @@
 {
     "name":"CBStreams",
-    "version":"2.0.1",
+    "version":"2.1.0",
     "location":"https://downloads.ortussolutions.com/ortussolutions/coldbox-modules/cbstreams/@build.version@/cbstreams-@build.version@.zip",
     "author":"Ortus Solutions, Corp",
     "homepage":"https://github.com/ortus-solutions/cbstreams",
