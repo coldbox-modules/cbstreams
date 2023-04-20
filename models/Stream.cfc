@@ -293,7 +293,10 @@ component accessors="true" {
 			variables.jStream = variables.jStream.sorted();
 		} else {
 			variables.jStream = variables.jStream.sorted(
-				createDynamicProxy( new cbproxies.models.Comparator( arguments.comparator ), [ "java.util.Comparator" ] )
+				createDynamicProxy(
+					new cbproxies.models.Comparator( arguments.comparator ),
+					[ "java.util.Comparator" ]
+				)
 			);
 		}
 		return this;
@@ -394,10 +397,7 @@ component accessors="true" {
 	 */
 	Stream function onClose( required closeHandler ){
 		variables.jStream = variables.jStream.onClose(
-			createDynamicProxy(
-				new cbproxies.models.Runnable( arguments.closeHandler ),
-				[ "java.lang.Runnable" ]
-			)
+			createDynamicProxy( new cbproxies.models.Runnable( arguments.closeHandler ), [ "java.lang.Runnable" ] )
 		);
 		return this;
 	}

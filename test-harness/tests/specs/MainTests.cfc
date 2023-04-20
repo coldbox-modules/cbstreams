@@ -66,11 +66,13 @@
 			story( "I can generate streams from a query", function(){
 				given( "a query", function(){
 					then( "it will generate the correct stream", function(){
-						var q = querySim( "id,name
+						var q = querySim(
+							"id,name
 						1 | luis
 						2 | Joe
 						3 | Bill
-						4 | Juan" );
+						4 | Juan"
+						);
 
 						var data = new cbstreams.models.Stream( q )
 							.filter( function( item ){

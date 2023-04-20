@@ -7,33 +7,33 @@
 component {
 
 	// Module Properties
-	this.title 				= "CB Streams";
-	this.author 			= "Ortus Solutions, Corp";
-	this.webURL 			= "https://github.com/ortus-solutions/cbstreams";
-	this.description 		= "Java Streams support for CFML";
+	this.title             = "CB Streams";
+	this.author            = "Ortus Solutions, Corp";
+	this.webURL            = "https://github.com/ortus-solutions/cbstreams";
+	this.description       = "Java Streams support for CFML";
 	// CF Mapping
-	this.cfmapping			= "cbstreams";
-	this.modelNamespace 	= "cbstreams";
+	this.cfmapping         = "cbstreams";
+	this.modelNamespace    = "cbstreams";
 	// Helpers
 	this.applicationHelper = [ "helpers/Mixins.cfm" ];
 	// Module Dependencies That Must Be Loaded First, use internal names or aliases
-	this.dependencies		= [];
+	this.dependencies      = [];
 
 	/**
-	* Configure this module
-	*/
+	 * Configure this module
+	 */
 	function configure(){
 	}
 
 	/**
-	* Fired when the module is registered and activated.
-	*/
+	 * Fired when the module is registered and activated.
+	 */
 	function onLoad(){
 	}
 
 	/**
-	* Fired when the module is unregistered and unloaded
-	*/
+	 * Fired when the module is unregistered and unloaded
+	 */
 	function onUnload(){
 	}
 
