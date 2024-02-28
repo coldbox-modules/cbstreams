@@ -425,7 +425,27 @@
 				} );
 
 				given( "The default array collector", function(){
-					then( "it will produce an array collection", function(){
+					then( "it will produce an array", function(){
+						var results = new cbStreams.models.Stream( [ "aa", "aa", "bb", "c", "d", "c" ] ).collect();
+						expect( results ).toBeInstanceOf( "java.util.ArrayList" );
+						expect( results.size() ).toBe( 6 );
+					} );
+				} );
+
+				given( "The CFML array collector", function(){
+					then( "it will produce a CFML array", function(){
+						var results = new cbStreams.models.Stream( [ "aa", "aa", "bb", "c", "d", "c" ] ).collectAsArray();
+						if ( server.keyExists( "lucee" ) ) {
+							expect( results ).toBeInstanceOf( "lucee.runtime.type.ArrayImpl" );
+						} else {
+							expect( results ).toBeInstanceOf( "coldfusion.runtime.Array" );
+						}
+						expect( results.len() ).toBe( 6 );
+					} );
+				} );
+
+				given( "The set collector", function(){
+					then( "it will produce an set collection", function(){
 						var setOfNames = new cbStreams.models.Stream( [ "aa", "aa", "bb", "c", "d", "c" ] ).collectAsSet();
 						expect( setOfNames.size() ).toBe( 4 );
 					} );
@@ -460,9 +480,17 @@
 				} );
 
 
+				given( "The map collector and a key and id mapper", function(){
+					then( "it will produce a struct of the collection of those mappers", function(){
+						var results = new cbStreams.models.Stream( people ).collectAsMap( "id", "name" );
+						expect( results ).toBeInstanceOf( "java.util.HashMap" );
+					} );
+				} );
+
 				given( "The struct collector and a key and id mapper", function(){
 					then( "it will produce a struct of the collection of those mappers", function(){
 						var results = new cbStreams.models.Stream( people ).collectAsStruct( "id", "name" );
+						expect( results ).notToBeInstanceOf( "java.util.HashMap" );
 						expect( results ).toBeStruct();
 					} );
 				} );

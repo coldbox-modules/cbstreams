@@ -504,6 +504,14 @@ component accessors="true" {
 		return variables.jStream.toArray();
 	}
 
+	/**
+	 * Returns an array containing the elements of this stream.
+	 * Right now, an alias of toArray(), with the hope that we can convert the `toArray` to a CFML array in the future.
+	 */
+	function toNativeArray(){
+		return variables.jStream.toArray();
+	}
+
 
 	/**
 	 * Returns the count of elements in this stream.
@@ -788,6 +796,17 @@ component accessors="true" {
 	}
 
 	/**
+	 * A mutable reduction operation that accumulates input elements into a mutable result container, optionally transforming the accumulated result into a final representation after all input elements have been processed.
+	 * By default we will collect to a CFML array.
+	 *
+	 * This is a terminal operation.
+	 *
+	 */
+	function collectAsArray(){
+		return arraySlice( variables.jStream.collect( variables.Collectors.toList() ), 1 );
+	}
+
+	/**
 	 * Returns a Collector implementing a "group by" operation on input elements, grouping elements according to a
 	 * classification function, and returning the results in a struct according to the classifier function
 	 *
@@ -919,7 +938,7 @@ component accessors="true" {
 	}
 
 	/**
-	 * Collect the items to a struct. Please be sure to map the appropriate key and value identifiers
+	 * Collect the items to a HashMap. Please be sure to map the appropriate key and value identifiers
 	 *
 	 * NOTE: the struct type will only work if the collection we are collecting is a struct or an object
 	 * This is a terminal operation.
@@ -928,7 +947,7 @@ component accessors="true" {
 	 * @valueID   If using struct, then we need to know what will be the value key in the collection struct
 	 * @overwrite If using struct, then do you overwrite elements if the same key id is found. Defaults is true.
 	 */
-	function collectAsStruct(
+	function collectAsMap(
 		required keyID,
 		required valueID,
 		boolean overwrite = true
@@ -979,6 +998,30 @@ component accessors="true" {
 		return variables.jStream.collect(
 			variables.Collectors.toMap( keyFunction, valueFunction, overrideFunction )
 		);
+	}
+
+	/**
+	 * Collect the items to a CFML struct. Please be sure to map the appropriate key and value identifiers
+	 *
+	 * NOTE: the struct type will only work if the collection we are collecting is a struct or an object
+	 * This is a terminal operation.
+	 *
+	 * @keyID     If using struct, then we need to know what will be the key value in the collection struct
+	 * @valueID   If using struct, then we need to know what will be the value key in the collection struct
+	 * @overwrite If using struct, then do you overwrite elements if the same key id is found. Defaults is true.
+	 */
+	function collectAsStruct(
+		required keyID,
+		required valueID,
+		boolean overwrite = true
+	){
+		var newStruct = {};
+		structAppend(
+			newStruct,
+			collectAsMap( argumentCollection = arguments ),
+			true
+		);
+		return newStruct;
 	}
 
 	/**
