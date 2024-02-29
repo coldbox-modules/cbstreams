@@ -11,8 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Adobe 2023 support
 - Github Actions
 - ColdBox 7 auto testing
+- Clearer naming showing when methods return Java collections instead of native CFML collections such as `getNativeArray` and `collectToMap`.
+- Additional methods such as `collectToArray` to return CFML collections natively.
 
 ## [2.0.1] => 2022-SEP-29
 
