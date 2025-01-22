@@ -77,7 +77,7 @@ component accessors="true" {
 			// Check if the array is already a Java array, no need of casting
 			if (
 				reFindNoCase(
-					"(coldfusion|lucee|java\.util\.ArrayList)",
+					"(coldfusion|lucee|boxlang|java\.util\.ArrayList)",
 					arguments.collection.getClass().getCanonicalName()
 				)
 			) {
@@ -85,6 +85,7 @@ component accessors="true" {
 			} else {
 				variables.jStream = variables.Arrays.stream( arguments.collection );
 			}
+			
 			return this;
 		}
 
