@@ -66,11 +66,13 @@
 			story( "I can generate streams from a query", function(){
 				given( "a query", function(){
 					then( "it will generate the correct stream", function(){
-						var q = querySim( "id,name
+						var q = querySim(
+							"id,name
 						1 | luis
 						2 | Joe
 						3 | Bill
-						4 | Juan" );
+						4 | Juan"
+						);
 
 						var data = new cbstreams.models.Stream( q )
 							.filter( function( item ){
@@ -111,8 +113,13 @@
 
 			story(
 				story = "I can use generation of streams",
-				skip  = ( !server.keyExists( "lucee" ) ),
-				body  = function(){
+				// This tests works on all CF engines/versions except for ColdFusion 2018
+				skip  = (
+					!server.keyExists( "boxlang" ) && server.keyExists( "coldfusion" ) && server.coldfusion.productname contains "ColdFusion" && server.coldfusion.productVersion.startsWith(
+						"2018"
+					)
+				),
+				body = function(){
 					given( "a limited infinite stream", function(){
 						then( "a stream of data will be generated", function(){
 							var data = new cbstreams.models.Stream()
@@ -382,9 +389,8 @@
 						var aPeople = new cbStreams.models.Stream( people ).collectGroupingBy( function( item ){
 							return item.price;
 						} );
-
-						expect( aPeople[ 25 ] ).toHaveLength( 1 );
-						expect( aPeople[ 30 ] ).toHaveLength( 2 );
+						expect( aPeople[ "25" ] ).toHaveLength( 1 );
+						expect( aPeople[ "30" ] ).toHaveLength( 2 );
 					} );
 				} );
 
@@ -423,7 +429,29 @@
 				} );
 
 				given( "The default array collector", function(){
-					then( "it will produce an array collection", function(){
+					then( "it will produce an array", function(){
+						var results = new cbStreams.models.Stream( [ "aa", "aa", "bb", "c", "d", "c" ] ).collect();
+						expect( results ).toBeInstanceOf( "java.util.ArrayList" );
+						expect( results.size() ).toBe( 6 );
+					} );
+				} );
+
+				given( "The CFML array collector", function(){
+					then( "it will produce a CFML array", function(){
+						var results = new cbStreams.models.Stream( [ "aa", "aa", "bb", "c", "d", "c" ] ).collectAsArray();
+						if ( server.keyExists( "boxlang" ) ) {
+							expect( results ).toBeInstanceOf( "ortus.boxlang.runtime.types.Array" );
+						} else if ( server.keyExists( "lucee" ) ) {
+							expect( results ).toBeInstanceOf( "lucee.runtime.type.ArrayImpl" );
+						} else {
+							expect( results ).toBeInstanceOf( "coldfusion.runtime.Array" );
+						}
+						expect( results.len() ).toBe( 6 );
+					} );
+				} );
+
+				given( "The set collector", function(){
+					then( "it will produce an set collection", function(){
 						var setOfNames = new cbStreams.models.Stream( [ "aa", "aa", "bb", "c", "d", "c" ] ).collectAsSet();
 						expect( setOfNames.size() ).toBe( 4 );
 					} );
@@ -458,9 +486,17 @@
 				} );
 
 
+				given( "The map collector and a key and id mapper", function(){
+					then( "it will produce a struct of the collection of those mappers", function(){
+						var results = new cbStreams.models.Stream( people ).collectAsMap( "id", "name" );
+						expect( results ).toBeInstanceOf( "java.util.HashMap" );
+					} );
+				} );
+
 				given( "The struct collector and a key and id mapper", function(){
 					then( "it will produce a struct of the collection of those mappers", function(){
 						var results = new cbStreams.models.Stream( people ).collectAsStruct( "id", "name" );
+						expect( results ).notToBeInstanceOf( "java.util.HashMap" );
 						expect( results ).toBeStruct();
 					} );
 				} );

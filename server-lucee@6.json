@@ -1,8 +1,8 @@
 {
-    "name":"cbstreams-adobe@2021",
+    "name":"cbstreams-lucee@6",
     "app":{
-        "serverHomeDirectory":".engine/adobe2021",
-        "cfengine":"adobe@2021"
+        "serverHomeDirectory":".engine/lucee6",
+        "cfengine":"lucee@6"
     },
     "web":{
         "http":{
@@ -11,16 +11,13 @@
         "rewrites":{
             "enable":"true"
         },
-		"webroot":"test-harness",
+        "webroot":"test-harness",
         "aliases":{
             "/moduleroot/cbstreams":"../"
         }
     },
     "openBrowser":"false",
-	"cfconfig":{
+    "cfconfig":{
         "file":".cfconfig.json"
-    },
-    "scripts" : {
-        "onServerInstall":"cfpm install zip,debugger"
     }
 }

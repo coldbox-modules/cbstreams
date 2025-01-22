@@ -1,4 +1,19 @@
-[![cbstreams CI](https://github.com/coldbox-modules/cbstreams/actions/workflows/ci.yml/badge.svg)](https://github.com/coldbox-modules/cbstreams/actions/workflows/ci.yml)
+<p align="center">
+	<img src="https://www.ortussolutions.com/__media/coldbox-185-logo.png">
+	<br>
+	<img src="https://www.ortussolutions.com/__media/wirebox-185.png" height="125">
+	<img src="https://www.ortussolutions.com/__media/cachebox-185.png" height="125" >
+	<img src="https://www.ortussolutions.com/__media/logbox-185.png"  height="125">
+</p>
+
+<p align="center">
+	Copyright Since 2005 ColdBox Platform by Luis Majano and Ortus Solutions, Corp
+	<br>
+	<a href="https://www.coldbox.org">www.coldbox.org</a> |
+	<a href="https://www.ortussolutions.com">www.ortussolutions.com</a>
+</p>
+
+----
 
 # CB Streams
 
@@ -216,7 +231,8 @@ Terminal operations are a way to finalize the execution of the stream.  Please n
 - `iterator()` - Return a java iterator of the stream
 - `spliterator()` - Return a java spliterator of the stream
 - `close()` - Close the stream
-- `toArray()` - Convert the stream back into an array
+- `toArray()` - Convert the stream back into a native Java array
+- `toNativeArray()` - Convert the stream back into a native Java array. Currently and alias of `toArray` with the hope that in the future `toArray` will return a CFML array.
 - `count()` - Count the elements in the stream
 - `findAny()` - Find any element in the stream
 - `findFirst()` - Find the first element in the stream
@@ -234,14 +250,16 @@ Terminal operations are a way to finalize the execution of the stream.  Please n
 
 Collectors are the way to get out of the streams world and obtain a concrete collection of values, like a list, struct, etc.  Here are our collector methods available to you:
 
-- `collect()` - Return an array of the final elements.
+- `collect()` - Return an ArrayList of the final elements.
+- `collectAsArray()` - Return a CFML Array of the final elements.
 - `collectGroupingBy( classifier )` - Build a final collection according to the classifier lambda/closure that will classify the keys in the group.  This is usually a structure of elements.
 - `collectAverage( mapper, primitive=long )` - Collect an average according to the mapper function/closure.
 - `collectSum( mapper, primitive=long )` - Collect a sum according to the mapper function/closure.
 - `collectSummary( mapper, primitive=long )` - Collect a statistics struct according to the mapper function/closure .
 - `collectAsList( delimiter=",", prefix, suffix )` - Collect results into a string list with a delimiter and attached prefix and/or suffix.
 - `collectAsSet()` - Collect the items to a set which doesn't include duplicate elements.
-- `collectAsStruct( keyID, valueID, overwrite=true )` - Collect the elements into a struct by leveraging the key identifier and the value identifier from the stream of elements to pass into the collection.
+- `collectAsMap( keyID, valueID, overwrite=true )` - Collect the elements into a HashMap by leveraging the key identifier and the value identifier from the stream of elements to pass into the collection.
+- `collectAsStruct( keyID, valueID, overwrite=true )` - Collect the elements into a CFML struct by leveraging the key identifier and the value identifier from the stream of elements to pass into the collection.
 - `collectPartitioningBy( predicate )` - partitions the input elements according to a Predicate closure/lambda, and organizes them into a Struct of <Boolean, array >.
 
 
