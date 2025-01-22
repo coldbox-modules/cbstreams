@@ -114,8 +114,12 @@
 			story(
 				story = "I can use generation of streams",
 				// This tests works on all CF engines/versions except for ColdFusion 2018
-				skip  = ( !server.keyExists( "boxlang" ) && server.keyExists( "coldfusion" ) && server.coldfusion.productname contains 'ColdFusion' && server.coldfusion.productVersion.startsWith("2018") ),
-				body  = function(){
+				skip  = (
+					!server.keyExists( "boxlang" ) && server.keyExists( "coldfusion" ) && server.coldfusion.productname contains "ColdFusion" && server.coldfusion.productVersion.startsWith(
+						"2018"
+					)
+				),
+				body = function(){
 					given( "a limited infinite stream", function(){
 						then( "a stream of data will be generated", function(){
 							var data = new cbstreams.models.Stream()
@@ -435,7 +439,7 @@
 				given( "The CFML array collector", function(){
 					then( "it will produce a CFML array", function(){
 						var results = new cbStreams.models.Stream( [ "aa", "aa", "bb", "c", "d", "c" ] ).collectAsArray();
-						if( server.keyExists( 'boxlang' ) ) {
+						if ( server.keyExists( "boxlang" ) ) {
 							expect( results ).toBeInstanceOf( "ortus.boxlang.runtime.types.Array" );
 						} else if ( server.keyExists( "lucee" ) ) {
 							expect( results ).toBeInstanceOf( "lucee.runtime.type.ArrayImpl" );

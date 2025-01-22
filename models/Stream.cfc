@@ -85,7 +85,7 @@ component accessors="true" {
 			} else {
 				variables.jStream = variables.Arrays.stream( arguments.collection );
 			}
-			
+
 			return this;
 		}
 
