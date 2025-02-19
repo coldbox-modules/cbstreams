@@ -17,11 +17,13 @@
 
 # CB Streams
 
-Welcome to the wonderful world of Java Streams ported for the CFML world!
+Welcome to the wonderful world of Java Streams!
 
 > The whole idea of streams is to enable functional-style operations on streams of elements. A stream is an abstraction, it’s not a data structure. It’s not a collection where you can store elements. The most important difference between a stream and a structure is that a stream doesn’t hold the data. For example you cannot point to a location in the stream where a certain element exists. You can only specify the functions that operate on that data. A stream is an abstraction of a non-mutable collection of functions applied in some order to the data.
 
-The beauty of streams is that the elements in a stream are processed and passed across the processing pipeline. Unlike traditional CFML functions like `map(), reduce() and filter()` which create completely new collections until all items in the pipeline are processed.  With streams, the elements are streamed across the pipeline to increase efficiency and performance.
+**If you are using BoxLang, this module is not necessary as BoxLang supports all the native streams API.**
+
+The beauty of streams is that the elements in a stream are processed and passed across the processing pipeline. Unlike traditional CFML member functions like `map(), reduce() and filter()` which create completely new collections until all items in the pipeline are processed.  With streams, the elements are streamed across the pipeline to increase efficiency and performance.
 
 You can also leverage streams in parallel for parallel execution and take it further with concurrent programming.
 

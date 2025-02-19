@@ -13,6 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Updated github actions
+- BoxLang certification
+
+## [2.1.0] - 2025-01-22
+
+### Added
+
 - Adobe 2023 support
 - Github Actions
 - ColdBox 7 auto testing
