@@ -1,6 +1,6 @@
 {
     "name":"CBStreams",
-    "version":"2.2.0",
+    "version":"2.3.0",
     "location":"https://downloads.ortussolutions.com/ortussolutions/coldbox-modules/cbstreams/@build.version@/cbstreams-@build.version@.zip",
     "author":"Ortus Solutions, Corp",
     "homepage":"https://github.com/ortus-solutions/cbstreams",
@@ -25,7 +25,7 @@
         "cbproxies":"^1.0.0"
     },
     "devDependencies":{
-		"commandbox-boxlang":"*",
+        "commandbox-boxlang":"*",
         "commandbox-cfformat":"*",
         "commandbox-docbox":"*",
         "commandbox-dotenv":"*",
