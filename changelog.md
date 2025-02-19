@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2025-02-19
+
 ## [2.1.0] - 2025-01-22
 
 ### Added
@@ -95,6 +97,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First iteration of this module
 
-[Unreleased]: https://github.com/coldbox-modules/cbstreams/compare/v2.1.0...HEAD
-
+[unreleased]: https://github.com/coldbox-modules/cbstreams/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/coldbox-modules/cbstreams/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/coldbox-modules/cbstreams/compare/1098b1ab2bb3d6abf16dbf3912b46846a2ee8a2c...v2.1.0
